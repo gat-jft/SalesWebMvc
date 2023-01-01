@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SalesWebMvc_.Net7.Models;
 using System.Diagnostics;
+using SalesWebMvc_.Net7.Models.ViewModels; // Para a Ação Error(), ver o tipo ErrorViewModels, ao criar o novo objeto deste tipo.
 
 namespace SalesWebMvc_.Net7.Controllers
 {
@@ -25,7 +26,7 @@ namespace SalesWebMvc_.Net7.Controllers
 
             return View();
             // TENHO VÁRIAS POSSIBILIDADES DE MÉTODOS QUE VÃO ME AUXILIAR A INSTANCIAR O IActionResult (objeto de resposta) COMO UMA RESPOSTA.
-            //return View(); // retorna uma (um tipo) ViewResult, ou seja uma View (página).
+            //return View(); // retorna uma (um tipo) ViewResult, ou seja uma View (Tela).
             //return File(); // retorna um tipo FileResult (arquivo);
             //return Content(); // retorna um ContentResult (conteúdo)
             //return RedirectToAction(); // retorna um RedirectToRouteResult (um Redirecionamento para rota).
