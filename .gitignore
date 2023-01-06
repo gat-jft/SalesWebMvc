@@ -348,3 +348,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/SalesWebMvc_.Net7/Migrations/SalesWebMvc_Net7ContextModelSnapshot.cs
