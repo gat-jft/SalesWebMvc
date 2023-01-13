@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SalesWebMvc_.Net7.Data;
+using SalesWebMvc_.Net7.Models;
 
 #nullable disable
 
 namespace SalesWebMvc.Net7.Migrations
 {
     [DbContext(typeof(SalesWebMvc_Net7Context))]
-    [Migration("20230106055232_OtherEntities")]
+    [Migration("20230106042947_OtherEntities")]
     partial class OtherEntities
     {
         /// <inheritdoc />
