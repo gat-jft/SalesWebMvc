@@ -8,8 +8,8 @@ namespace SalesWebMvc_.Net7.Models
     public class Seller
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
         public DateTime BirthDate { get; set; } // DataDeNascimento
         public double BaseSalary { get; set; } // Salário
 
