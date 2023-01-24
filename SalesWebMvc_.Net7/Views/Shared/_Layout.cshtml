@@ -20,16 +20,16 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1 text-black-50">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-body" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
+                            <a class="nav-link text-body" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Sellers" asp-action="Index">Sellers</a>
+                            <a class="nav-link text-body" asp-area="" asp-controller="Sellers" asp-action="Index">Sellers</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-body" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                 </div>
@@ -54,11 +54,18 @@
 </body>
 </html>
 
-@* COMENTÁRIO:
-        
-    incluir na class=""
+@* COMENTÁRIO 1:
+    Uma forma rápida de mudar o tamanho da fonte é:    
+    Incluir na class="", os comandos:
       display-1 // coloca a fonte do h1
       display-2 // coloca a fonte do h2
       ...  
       E assim sucessivamente.
+
+
+   COMENTÁRIO 2: 
+    Os LINKs (<a>), estavam usando o comando text-dark 
+    do arquivo "bootstrap-flatly.css". Aí, a fonte dos
+    caracteres apareciam muito claros.
+      Mudei para text-body, que tem outro valor MAIOR para o atributo color.
 *@

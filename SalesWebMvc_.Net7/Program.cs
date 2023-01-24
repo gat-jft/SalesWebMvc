@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 
 namespace SalesWebMvc_.Net7
 {
@@ -15,8 +16,8 @@ namespace SalesWebMvc_.Net7
             //
             // Aí, funcionou.
             // ERROS que deram antes de eu adicionar a Startup:
-            // - Não conseguia colocar o meu Serviço como um serviço de injeção de
-            //   dependência. Porque, na Program, ele não consegui manipular
+            // - Não conseguia colocar o meu Serviço no Sistema de Injeção de
+            //   Dependência. Porque, na Program, ele não consegui manipular
             //   o Método Configure, no objeto builder. 
 
             CreateWebHostBuilder(args).Build().Run(); 

@@ -17,7 +17,7 @@ namespace SalesWebMvc_.Net7.Models
         // Property´s tipo DbSet<T>. Representam as tabelas no meu Db (DbContext). 
         //
         // Podemos apagar o caminho "SalesWebMvc_.Net7.Models" de dentro dos <>, uma vez que ele é desnecessário. Porque já tem namespace no import ("using") na linha 6.     // Note que ele já está ESMAECIDO (desnecessário).
-        public DbSet<SalesWebMvc_.Net7.Models.Department> Department { get; set; } = default!; // "= default!;" também é DESNECESSÁRIO, para eu declarar os Atributos (Property´s). 
+        public DbSet<SalesWebMvc_.Net7.Models.Department> Department { get; set; } = default!; // "= default!;" também é DESNECESSÁRIO, para eu declarar os Atributos (Property´s)???   // ACHO que não.
         public DbSet<SalesRecord> SalesRecord { get; set; } = default!;
         public DbSet<Seller> Seller { get; set; } = default!;
     }

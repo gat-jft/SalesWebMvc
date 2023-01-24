@@ -21,6 +21,9 @@ namespace SalesWebMvc_.Net7.Services
         //
         // Mais prá frente no Curso, nós vamos discutir como transformar estas operações de acesso a dados, em operações ASSÍNCRONAS:
         // Desta forma, aumentando muito a performance da nossa Aplicação.  
+        //
+        // Este Método (operação) é de um Service. Não de um Controller. 
+        // As operações de controlers geralmente são Index(), Contact(), Delete() etc.
         public List<Seller> FindAll()
         {
             //List<Seller> list = new List<Seller>();
@@ -29,6 +32,18 @@ namespace SalesWebMvc_.Net7.Services
 
             // O comando abaixo, substitui tudo acima.  // O comando abaixo, vai acessar minha tabela de dados relacionada à Vendedores (Seller), e converter isto para uma Lista.
             return _context.Seller.ToList();
+        }
+
+        // Método para inserir um NOVO Vendedor (Seller obj) no BD.
+        public void Insert(Seller obj)
+        {
+            _context.Add(obj);
+            _context.SaveChanges();
+
+            // Só adicionar o obj Seller no BD não vai adicionar.
+            // Eu preciso também confirmar.
+            // É o _context.SaveChanges().
+
         }
     }
 }
