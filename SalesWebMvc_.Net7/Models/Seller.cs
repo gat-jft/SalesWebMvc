@@ -16,6 +16,11 @@ namespace SalesWebMvc_.Net7.Models
         // Associação 1 prá 1: Vendedor "TEM 1" (é composto por 1) Departamento. 
         public Department Department { get; set; }
 
+        // Com esta declaração (colocando o sufixo "Id" depois da Classe (Department) tem tem o relacionamento "PARA 1" com esta Classse Selle)), o framework já sabe que este campo é um INT (correspondente ao Id do Department) e que NÃO pode ser NULO 
+        // Com isso aqui, a gente tá avisando pro FRAMEWORK que este Id vai ter que existir. Uma vez que o tipo int (INT) não pode ser NULO.
+        public int DepartmentId { get; set; }
+
+
         // Associação ParaMuitos, do Vendedor com (MUITAS) as Vendas.      // 1 Vendedor "TEM MUITAS" Vendas.       // É uma composição: 1 Vendedor é composto (tem) Vendas (SalesRecord).      // Usamos o Tipo ICollection<T> porque ele serve para qq coleção (List<T>, HasSet<T etc).       // E já o instanciamos: no caso, uma Lista<T> vazia.  
         public ICollection<SalesRecord> Sales { get; set; } = new List<SalesRecord>();
 
