@@ -36,10 +36,7 @@ namespace SalesWebMvc_.Net7.Services
 
         // Método para inserir um NOVO Vendedor (Seller obj) no BD.
         public void Insert(Seller obj)
-        {
-            // Isso é para evitar aquele erro que estava dando quando eu tentava inserir um novo Vendedor SEM um Departamento. No formulário da View Create na pasta Sellers. 
-            obj.Department = _context.Department.First();
-
+        {           
             // Só adicionar o obj Seller no BD não vai adicionar.
             _context.Add(obj);
 

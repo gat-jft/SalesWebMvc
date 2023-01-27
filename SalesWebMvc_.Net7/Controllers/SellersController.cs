@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SalesWebMvc_.Net7.Models; // Para enxergar o Seller.
+using SalesWebMvc_.Net7.Models; // Para enxergar o "Seller".
+using SalesWebMvc_.Net7.Models.ViewModels; // Para ele exergar a Classe "SellerFormViewModel". Usada no Crete(), com [GET] 
 using SalesWebMvc_.Net7.Services;
 
 namespace SalesWebMvc_.Net7.Controllers
@@ -7,13 +8,17 @@ namespace SalesWebMvc_.Net7.Controllers
     public class SellersController : Controller
     {
         // Pra que o Index() chame o FindAll() lá do SellerService, vamos ter que declarar uma dependência (Property, não injeção de dependência que é outra coisa) com o SellerService.
-        private readonly SellerService _sellerService;       
-         
+        private readonly SellerService _sellerService;
+        private readonly DepartmentService _departmentService;
+
+
 
         // Vamos fazer o nosso Construtor pra ele injetar a dependência.
-        public SellersController(SellerService sellerService)
+        public SellersController
+            (SellerService sellerService, DepartmentService departmentService )
         {
             _sellerService = sellerService;
+            _departmentService = departmentService;
         }
 
         // Este método Index() vai ter que chamar a operação FindAll(), lá do SellerService.
@@ -40,6 +45,18 @@ namespace SalesWebMvc_.Net7.Controllers
         //Ação (com o Método GET DO HTTP) para criar um Novo Vendedor.
         public IActionResult Create()
         {
+            // 1°) Carregar (buscar do BD para cá) os Departamentos.
+            //              FindAll() é o método do serviço DepartmentService, que busca do BD Todos os Departamentos.
+            var departments = _departmentService.FindAll();
+            
+            // 2°) Instanciar um OBJETO do nosso ViewModel:
+            //       Este ViewModel nosso, ele tem 2 dados
+            //       - o Departaments (Departamentos), e,
+            //       - o Seller (Vendedor).
+            //         No Departments, eu já vou INICIAR com esta
+            //         Listinha de Departamentos, que nós acabamos de buscar (carregar) do BD.
+            var viewModel = new SellerFormViewModel { Departments = departments };
+
             // Como esta Ação é um MÉTODO GET DO HTTP, ela simplesmente retorna 1 View VAZIA.
             // Nós SEMPRE vamos usar este PADRÃO aqui:
             // - Se eu tiver uma Ação que altera alguma coisa no sistema (ou seja, usa o MÉTO POST DO HTTP), como o caso da Create(Seller seller):
@@ -63,8 +80,11 @@ namespace SalesWebMvc_.Net7.Controllers
             //          Ou seja, retorna um formulário vazio.
             //          Por isso este "return View()"
             //        - Se não tivesse esta AÇÃO SEM ARGUMENTO (ie, MÉTODO GET DO HTTP), no BD seria INSERIDA 1 Linha VAZIA.
-            //          E meu BD poderia ficar cheio espacos VAZIOS (sem elementos).            //        
-            return View();
+            //          E meu BD poderia ficar cheio espacos VAZIOS (sem elementos).                    
+
+            // 3°) Feito isso (instanciando um SellerFormViewModel com uma lista de Departamentos, mas SEM o Seller), eu vou passar este OBJETO "viewModel", pra minha View.
+            //           Agora, a minha TELA DE CADASTRO DE 1 VENDEDOR, quando ela for acionada pela 1ª VEZ, ela já vai receber este OBJETO "viewModel" aqui, com os DEPARTAMENTOS POPULADOS. 
+            return View(viewModel);
         }
 
         // Prá que eu receba este objeto da requisição, e instancie este Vendedor, basta eu colocar ele (este objeto) aqui como parâmetro do Método.

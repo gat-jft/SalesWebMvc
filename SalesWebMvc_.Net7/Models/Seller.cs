@@ -16,6 +16,7 @@ namespace SalesWebMvc_.Net7.Models
         // Associação 1 prá 1: Vendedor "TEM 1" (é composto por 1) Departamento. 
         public Department Department { get; set; }
 
+        // Adicionei este campo, para que não exista no BD, um Vendedor sem um DepartmentId (campo Id do Department).
         // Com esta declaração (colocando o sufixo "Id" depois da Classe (Department) tem tem o relacionamento "PARA 1" com esta Classse Selle)), o framework já sabe que este campo é um INT (correspondente ao Id do Department) e que NÃO pode ser NULO 
         // Com isso aqui, a gente tá avisando pro FRAMEWORK que este Id vai ter que existir. Uma vez que o tipo int (INT) não pode ser NULO.
         public int DepartmentId { get; set; }

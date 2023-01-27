@@ -71,6 +71,7 @@ namespace SalesWebMvc_.Net7
             // Com este comando, a gente REGISTRA O NOSSO SERVIÇO (SeedingService.cs) NO SISTEMA DE INJEÇÃO DE DEPENDÊNCIA DA APLICAÇÃO. 
             services.AddScoped<SeedingService>();
             services.AddScoped<SellerService>(); // Registrei no sistema de injeção de dependência. Agora, nosso Serviço (Classe) pode ser injetado em outras Classes. Não por mim, mas automaticamente pelo framework. Assim:   // Qualquer Classe que eu colocar no parêmetro construtor dela, que ela recebe um SellerService, toda vez que eu instanciar um objeto do tipo desta Classe, receberá um objeto SellerService automaticamente vinculado à ele.  
+            services.AddScoped<DepartmentService>();
         }
 
 
