@@ -4,7 +4,7 @@ using SalesWebMvc_.Net7.Models.Enums; // para ele reconhecer o tipo enumerado Sa
 namespace SalesWebMvc_.Net7.Models
 {
     public class SalesRecord
-    {
+    {     
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public double Amount { get; set; } // Quantia

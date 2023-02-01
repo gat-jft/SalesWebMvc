@@ -4,9 +4,9 @@ using SalesWebMvc_.Net7.Data;
 // Embora esta Classe esteja na pasta Data, ela está registrada no namespace SalesWebMc_7.Models
 namespace SalesWebMvc_.Net7.Models
 {
-    public class SalesWebMvc_Net7Context : DbContext 
+    public class SalesWebMvc_Net7Context : DbContext
     {
-        public SalesWebMvc_Net7Context (DbContextOptions<SalesWebMvc_Net7Context> options)
+        public SalesWebMvc_Net7Context(DbContextOptions<SalesWebMvc_Net7Context> options)
             : base(options)
         {
         }

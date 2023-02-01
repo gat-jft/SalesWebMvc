@@ -26,7 +26,12 @@
 
 
 
-REcorte da View Create (Sellers)
+
+
+
+
+
+// REcorte da View Create (Sellers)
 <div class="form-group">
                 <label class="custom-control-label"></label>
                 <input type="number" class="form-control" />
@@ -42,3 +47,15 @@ REcorte da View Create (Sellers)
 </div>
 
 
+
+
+
+// comentários da view Delete do Sellers.
+<!--
+    A 1ª coisa que fizemos neste arquivo (na linha 1), nós definimos o Tipo do model que ela recebe: Seller. // Mas eu tenho que informar o caminho completo.  // Este Tipo é o TipoDoObjeto (obj) retornado no Método Delete() do Controlador SellersController.
+
+    <hr />    salta 1 linha
+    <dl>      é pra ele listar os campos do nosso objeto.
+    <dt>      é para mostrar o NOME do campo.
+    <dd>      é para mostrar o VALOR do campo.
+-->

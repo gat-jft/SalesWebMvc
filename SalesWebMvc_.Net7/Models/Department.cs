@@ -7,6 +7,11 @@ namespace SalesWebMvc_.Net7.Models
 {
     public class Department
     {
+        // Classe (Entidade do meu negocio), que vai conter dos dados para uma View, GERALMENTE a Tela Index.
+        //
+        // Mas eu posso criar uma outra View além da Index, que pode usar um Department, no Controlador "Departments":
+        //    Neste caso, no arquivo da View eu coloco no @model dele o caminho.Department.
+        
         public int Id { get; set; }
         public string? Name { get; set; } // ? é para a Propriedade ser também anulável (receber o valor null).
 

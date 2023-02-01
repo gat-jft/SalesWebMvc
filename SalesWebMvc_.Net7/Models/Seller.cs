@@ -7,6 +7,12 @@ namespace SalesWebMvc_.Net7.Models
 {
     public class Seller
     {
+        // Classe (Entidade do meu negocio), que vai conter dos dados para uma View, GERALMENTE a Tela Index.
+        //
+        // Mas eu posso criar uma outra View além da Index, que pode usar um Seller, no Controlador "Sellers":
+        //    Neste caso, no arquivo da View eu coloco no @model dele o caminho.Seller.
+
+
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
