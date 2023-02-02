@@ -1,37 +1,4 @@
-﻿Retirado do final do Index do SellersService:
-@* COMENTÁRIO 1:
-    Na 1a. linha deste arquivo, eu estou dizendo que esta View
-    irá RECEBER um Tipo IEnumerable<Seller>
-    
-   COMENTÁRIO 2:
-    "table-sucess" que eu coloco na class="", é para colocar uma cor
-    de fundo VERDE (padrão do framework). 
-
-   COMENTÁRIO 3:
-    Na EXPRESSÃO LAMBDA do Html.DisplayFor(), é assim mesmo:
-    A gente usa outro apelido (modelItem), e depois a gente
-    chama este item (que é o item do foreach).
-
-
-   COMENTÁRIO 4:
-    Na Views/Sellers, na View Create, <labe>:
-    O professor ele usou: 
-        class="control-label"
-    
-    Eu coloquei 
-      class="col-form-label"
-*@
-
-
-
-
-
-
-
-
-
-
-// REcorte da View Create (Sellers)
+﻿// Recorte da View Create (Sellers)
 <div class="form-group">
                 <label class="custom-control-label"></label>
                 <input type="number" class="form-control" />
@@ -45,17 +12,3 @@
                 <label asp-for="Department.Name" class="control-label">Department Name</label>
                 <input asp-for="Department.Name" class="form-control" />
 </div>
-
-
-
-
-
-// comentários da view Delete do Sellers.
-<!--
-    A 1ª coisa que fizemos neste arquivo (na linha 1), nós definimos o Tipo do model que ela recebe: Seller. // Mas eu tenho que informar o caminho completo.  // Este Tipo é o TipoDoObjeto (obj) retornado no Método Delete() do Controlador SellersController.
-
-    <hr />    salta 1 linha
-    <dl>      é pra ele listar os campos do nosso objeto.
-    <dt>      é para mostrar o NOME do campo.
-    <dd>      é para mostrar o VALOR do campo.
--->

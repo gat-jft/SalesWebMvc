@@ -41,6 +41,19 @@
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Delete" class="btn btn-danger" />
-        <a asp-action="Index">Back to List</a>    
+        <a asp-action="Index">Back to List</a>
     </form>
 </div>
+
+<!--
+    A 1ª coisa que fizemos neste arquivo (na linha 1), nós definirmos o
+    Tipo do model que ela recebe: Seller.
+    // Mas eu tenho que informar o caminho completo.
+    // Este Tipo é o TipoDoObjeto (obj) retornado no Método Delete() do
+    // Controlador SellersController.
+
+    <hr />    salta 1 linha
+    <dl>      é pra ele listar os campos do nosso objeto.
+    <dt>      é para mostrar o NOME do campo.
+    <dd>      é para mostrar o VALOR do campo.
+-->

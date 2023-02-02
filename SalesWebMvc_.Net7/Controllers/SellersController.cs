@@ -36,6 +36,13 @@ namespace SalesWebMvc_.Net7.Controllers
             _departmentService = departmentService;
         }
 
+        // Métodos do Controlador:
+        // - NOTE que eles retornam sempre 1 IActionResult(View, RedirectToAction etc).
+        // - Não retornam int, Seller etc.
+        // 
+        // Porque?
+        // - Porque um IActionResult já é por exemplo uma View (tela) já montada.
+
         // Este método Index() vai ter que chamar a operação FindAll(), lá do SellerService.
         // Antes  disso, temos que declarar uma dependência para o SellerService (que é o _sellerService). Depois, devemos fazer o Construtor (public SellerSevice) deste Controller, prá ele INJETAR A DEPENDÊNCIA do serviço (SellerService).
         public IActionResult Index()
@@ -245,7 +252,9 @@ namespace SalesWebMvc_.Net7.Controllers
             //
             // Esta View eu ainda criar na pastinha Views/Sellers.
             // Ela terá que ter o mesmo nome deste Método aqui, claro!
-            return View(obj);
+            // 
+            // Se o objeto Seller existir, retorna a View (tela) de 1 Seller (Vendedor).
+            return View(obj); 
         }
 
         // Vamos criar agora uma outra Ação Delete, só que agora vai ser POST.
@@ -257,6 +266,35 @@ namespace SalesWebMvc_.Net7.Controllers
 
             // Removi e Vendedor - no comando anterior -, agora eu vou redirecionar prá tela inicial (View Index) de listagem de vendedores do meu CRUD. 
             return RedirectToAction(nameof(Index));
+        }
+
+        // Vamos criar a Ação Details(), no método GET.
+        // Esta ação vai receber um id OPCIONAL.
+        //
+        // A lógica dele, vai ser muito parecida com a do Delete() GET.
+        // Porque?
+        // - Eu vou ter que ver se meu id é NULO.
+        // - Eu vou ter que buscar o meu objeto.
+        //      Se ele for NULO também, eu vou dar o NotFound().
+        // - Depois, eu vou retornar o objeto.
+        // 
+        // Então, vamos copiar de lá prá cá.
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sellerService.FindById(id.Value);
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            // No final, passando por tudo acima, se o objeto Seller (Vendedor) existir,
+            // retorna a View (tela) de 1 Seller (Vendedor)
+            return View(obj); 
         }
     }
 }

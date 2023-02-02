@@ -1,0 +1,67 @@
+﻿@model SalesWebMvc_.Net7.Models.Seller
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>Seller</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.BirthDate)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.BirthDate)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.BaseSalary)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.BaseSalary)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Department) 
+            <!-- Department é o nome do objeto ASSOCIADO com o nosso ARROBAmodel tipo Seller. -->
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Department.Name)
+            <!-- Department.Name é prá mostrar o Nome do Departamento do Vendedor, mostrado nesta View. -->
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-dark">Edit</a>
+    <a asp-action="Index">Back to list</a>
+</div>
+
+
+<!--
+    Os campos "Department" e "Department.Name" não fazem parte do Seller retornado
+    nesta View.
+    Eles só serão mostrados se eu colocar lá no serviço SellerService, 
+    o Método Include(obj => obj.Department) ANTES do FirstOrDefault(). 
+    Lá no Método FindById().
+
+    Assim, o EntityFramework ira fazer o "easer loading"
+
+    O Método Include() NÃO É DO Linq nativo.
+    Ele é do NAMESPACE Microsoft.EntityframeworkCore.
+
+
+
+-->

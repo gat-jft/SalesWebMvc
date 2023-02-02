@@ -1,4 +1,6 @@
 ﻿using SalesWebMvc_.Net7.Models; // Para ele enxergar o NOSSO DbContext, que é o SalesWebMvc_Net7Context.     // Embora ele esteja na pasta Data, ele foi declarado com o namespace para a pasta .Models (SalesWebMvc_Net7.Models).
+using System.Linq;
+using Microsoft.EntityFrameworkCore; // Para a operação Include().
 
 
 namespace SalesWebMvc_.Net7.Services
@@ -64,7 +66,34 @@ namespace SalesWebMvc_.Net7.Services
             // ISSO NÃO É ERRO!
             // - Ele só tá avisando que pode ser que não exista
             //   um Vendedor. Daí NULO é um retorno POSSÍVEL.
-            return _context.Seller.FirstOrDefault(obj => obj.Id == id);
+            //
+            //
+            //
+            // O método Include(), é uma instrução específica do ENTITY FRAMEWORK,
+            // prá ele (Entity Framework), fazer o JOIN das tabelas.
+            // Com o Include() ANTES do FirstOrDefault(), o framework irá fazer
+            // a JOIN das 2 Tabelas:
+            // O Departamento (do Vendedor) do Método Include COM o Seller do Método
+            // FirstOrDefault().
+            // - Com o resultado do Include(), eu vou dar o FirstOrDefaut().
+            // - Com esta JUNÇÃO, eu PUDE colocar + os campos "Department" e 
+            //   "Department.Id", na View Details.
+            // - Porque esta View só trabalha com o model (objeto modelo) do tipo
+            //   Seller (Vendedor). Seller é um, Department é outro.
+            // - E uma View não aceita 2 @model.  
+            // - Este Include() então, faz o que é chamado de "eager loading", que
+            //   é "JÁ CARREGAR OUTROS OBJETOS ASSOCIADOS ÀQUELE OBJETO PRINCIPAL".
+            //
+            //  Não seria melhor criar uma ViewModel?
+            //  - Não.
+            //    ViewModel é para eu criar um objeto composto (personalizado).
+            //    Exemplo, um Seller (Vendedor) com uma Lista<Department>.
+            //  - Já o método Include() no context (BD) é para o ENTITY FRAMEWORK
+            //    fazer o JOIN de 2 Tabelas:
+            //            - da tabela que eu passar no Include() com a Tabela
+            //              de um outro Método aplicado depois do Include(), no
+            //              Context claro!
+            return _context.Seller.Include(obj => obj.Department).FirstOrDefault(obj => obj.Id == id);
         }
 
         // Agora vamos implementar o Método Remove.
