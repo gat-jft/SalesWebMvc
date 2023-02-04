@@ -1,7 +1,7 @@
 ﻿using SalesWebMvc_.Net7.Models; // Para ele enxergar o NOSSO DbContext, que é o SalesWebMvc_Net7Context.     // Embora ele esteja na pasta Data, ele foi declarado com o namespace para a pasta .Models (SalesWebMvc_Net7.Models).
 using System.Linq;
 using Microsoft.EntityFrameworkCore; // Para a operação Include().
-
+using SalesWebMvc_.Net7.Services.Exceptions; // Para o compilador encontrar a Exceção (classe) NotFoundException e a Exceção DbConcurrencyException. 
 
 namespace SalesWebMvc_.Net7.Services
 {
@@ -125,6 +125,175 @@ namespace SalesWebMvc_.Net7.Services
             // para o ENTITY FRAMEWORK efetivá-la, lá no Banco de Dados.
             // Prá fazer isso, eu ou ter que chamar o "_context.SaveChanges()".
             _context.SaveChanges();
+        }
+
+        // O que que vai ser atualizar um objeto do Tipo Seller?
+        //
+        // Update() corresponte a Ação de Edit (página) num CRUD.
+        // Tanto que, depois de implementar este Método, eu tenho que verificar SE O LINK PRA 
+        // AÇÃO DE Index (de Sellers) ESTÁ CORRETO.
+        public void Update(Seller obj)
+        {
+            // O que que vai ser atualizar um objeto do Tipo Seller?   
+
+            // - 1ª coisa eu vou testar se o Id deste OBJETO (obj), ele já existe no Banco.
+            //
+            // Porque, como eu estou ATUALIZANDO, o Id deste OBJETO (obj) já tem que existir.
+            // Prá testar isso, eu vou chamar o meu "_context.Seller.Any()"
+            //    O Any() serve prá falar SE EXISTE ALGUM REGISTRO NO BANCO DE DADOS, com a condição
+            //    que eu colocar nele (nos parâmetros).
+            //    - No caso, se existe no Banco. (_context), na tabela Seller. (Seller). AlgumRegistro
+            //      x, tal que o Id desteRegistro x seja igual ao Id do obj (do parâmetro). 
+            //
+            // - O que é o PREDICADO?
+            //   É toda a expressão lambda, ou seja, é uma função anônima.
+            // - No caso, "x => x.Id == obj.Id" é o PREDICATE.
+            // - Então, com o "if", eu estou testando:
+            //          SE EXISTE NO BANCO DE DADOS, ALGUM VENDEDOR (Seller) x, CUJO Id SEJA IGUAL AO 
+            //          Id DO MEU OBJETO (obj). 
+            //
+            //if (_context.Seller.Any(x => x.Id == obj.Id) == false), foi substituído pelo abaixo, com 
+            // "!" ANTES. Prá dizer que se NÃO (!) EXISTIR O ELEMENTO NO BD, COM O Id == AO Id DO obj.
+            if (!_context.Seller.Any(x => x.Id == obj.Id))
+            {
+                // Vou lançar a Exceção NotFoundException, com a MENSAGEM "id not found".
+                throw new NotFoundException("id not found");
+            }
+
+            // Se passou pelo "if", significa que já existe o objeto lá (no BD).
+            // Então, agora, eu vou atualizá-lo:
+            // - Eu vou chamar o "_context.Update".
+            //
+            // Veja o tanto que é simples eu atualizar o objeto usando o ENTITY FRAMEWORK.
+            //_context.Update(obj);
+            //_context.SaveChanges(); // Para confirmar a Atualização (Update()).
+
+
+
+            // Só que tem o seguinte:
+            // - Quando eu chamo a Operação de ATUALIZAR NO BANCO DE DADOS (_context.Update() e 
+            //   _context.SaveChanges(), o banco de dados pode retornar uma exceção de conflito
+            //   de concorrência.
+            // - Se este ERRO ocorrer no Banco de Dados, o ENTITY FRAMEWORK vai produzir uma
+            //   Exceção chamada "DbUpdateConcurrencyException".
+            // 
+            // Então, vamos colocar a Operação de ATUALIZAR NO BANCO DE DADOS (_context.Update() e 
+            // _context.SaveChanges()), num bloco "try", para TENTAR fazer isso
+            // (_context.Update() e _context.SaveChanges()).
+            //
+            // Antes, vamos comentar então os comandos (operações) de atualizar o BD:
+            // _context.Update(obj); E _context.SaveChanges();
+            // 
+            //
+            // E aí, eu vou colocar um bloco "catch", pra capturar uma possível concorrência do
+            // Banco de Dados.
+            // Que a tal da DbConcurrencyException.
+            try
+            {
+                _context.Update(obj);
+                _context.SaveChanges(); // Para confirmar a Atualização (Update()).
+            }
+            catch (DbUpdateConcurrencyException e)
+            {
+                // Então, se acontecer essa Exceção DbUpdateConcurrencyExceptiondo do
+                // ENTITY FRAMEWORK, aí eu vou RELANÇAR uma outra exceção em nível de
+                // Serviço (pasta Services), que vai ser a MINHA (personalizada)
+                // DBConcurrencyException. 
+                // - DBConcurrencyException que eu criei.
+                //
+                // E nessa Exceção, eu vou colocar a mensagem que veio do BANCO DE DADOS
+                throw new DBConcurrencyException(e.Message);
+
+
+
+
+                // Perceba o seguinte:
+                // Prá nossa aplicação ficar TOP em termos de  CAMADAS, o que eu eu estou
+                // fazendo:
+                // - Eu estou interceptando uma exceção do Nível de Acesso à Dados, que é a
+                //   catch (DbUpdateConcurrencyException.
+                // - E eu estou RELANÇANDO esta exceção, só que usando a minha exceção em 
+                //   Nível de Serviço: DBConcurrencyException.
+                // - Isso aqui é muito importante pra SEGREGAR AS CAMADAS:
+                //        A minha camada de Serviço, ela não vai propagar uma exceção do Nível
+                //        de Acesso A Dados.
+                //   Se uma exceção de Nível de Acesso à Dados acontecer, a minha Camada de
+                //   Serviço ela lançar uma exceção da Camada dela.
+                //        E aí, o meu controlador (que no caso aqui vai ser o SellersController,
+                //        ele vai ter que lidar com exceções somente da Camada de Serviço.
+                // - Isso é uma forma da gente respeitar aquela arquitetura que nós propusemos a
+                //   fazer, que é essa daqui: 
+                //    ARQUITETURA GERAL:                                   
+                //    View <--> Controller <--> Model (Services / Repositores / Entities).
+                //    
+                //   A arquitetura Geral:
+                //     O Controlador conversa com a camada de Serviço (Services).
+                //     Exceções do Nível de Acesso à Dados (Repositories) são capturadaras
+                //     (bloco catch) pelo Serviço, e RELANÇADAS na forma de exceções do Serviço
+                //     (Serviços) para o controlador.
+                //  Ou seja, na nossa arquitetura geral, o controlador não conversa diretamente
+                //  com os Repositories (acesso a Dados): Antes dos Repositories, vem os Services.
+                //
+                //
+                //
+                //
+                //   ARQUITETURA GERAL:                                   
+                //   View <--> Controller <--> Model (Services / Repositores / Entities). 
+                //
+                //   // Veja o esquema no Word desta Aula. 
+                //   // Eu entender essa dinâmica para o meu recrutador, vai ser muito positivo
+                //   // pra mim.
+                //
+                //    O Model é dividido em: Serviços - Repositórios / Entidades.
+                //   
+                //    Veja que na Arquitetura Geral, o Controlador não conversa (não manipula
+                //    ou obtém dados) diretamente com um Repositorie (camada de acesso à dados):
+                //
+                //    Eu devo implementar:
+                //    - SERVIÇOS para acessar/manipular os Dados das TABELAS do BD.
+                //      Um exemplo é o SellerService, que obtém/manipula os dados da tabela
+                //      Seller. 
+                //
+                //        Serviços (como exemplo o SellerService, DepartmentService) são para
+                //        acessar as TABELAS (repositories) 'Seller' e 'Department'. 
+                //        NÃO são para acessar as Classes (Entidades) Seller e Department. 
+                //      
+                //
+                //    Foi o que fizemos:
+                //     - Eu fiz 2 Serviços para acessar exceções do BD: estes serviços relançam
+                //              as informações (exceções) do BD (Repositories).
+                //     - Eu fiz 1 Serviço (SeedingService) pra popular o BD.
+                //     - O FRAMEWORK tem 1 Serviço (services.AddDbContext<>) que nos <> eu informo
+                //         qual será o meu Context pra montagem do BD.
+                //     - Eu fiz 1 Serviço (DepartmentService), que depende (injeção de Dependência)
+                //          do nosso Context (que usa Serviços do FRAMEWORK para uma sessão com o BD)
+                //          para Listar os Departamentos.
+                //     - Eu fiz este Serviço aqui (SellerService), que também depende do nosso Context
+                //          para as operações relacionadas à Entidade Seller (Vendedor).
+                //          Com as operações:
+                //          - FindAll (para listar todos os Sellers),
+                //          - FindById (para mostrar 1 Seller, baseado num Id),
+                //          - Insert (Inserir 1 new Seller no BD).
+                //          - Remove (Remover 1 Seller do BD).
+                //          - Update (Atualiza os dados de 1 Vendedor).
+                //      
+                //      Assim, para um projeto bem feito (que segue uma arquitetura geral), um
+                //      Controlador, por exemplo o SellersController, nunca terá acesso diretamente
+                //      a um repositorie (CAMADA que acessa Dados).
+                //      UM controlador deverá, através da CAMADA de Serviços, acessar a Camada de
+                //      Acesso à Dados (repositorie).
+                //        - Ele é uma Classe que herda da Controller (superClasse).
+                //        - Ele é uma Classe então com suporte à View (página Razor).
+                //        - Com ele eu não devo acessar ou manipular um Banco de Dados, DIRETAMENTE:
+                //              Mas com os Serviços injetados nele (no controlador) para isso.
+                //        - Assim, as Ações (requisições) do usuário, ele (controlador) vai usar os
+                //          serviços injetados nele, e com o retorno desses serviços - como um
+                //          controlador HERDA de uma Classe que tem suporte a View, ele também
+                //          terá suporte a View - geralmente ele retornará uma View (pagina .cshtml)
+                //          para o usuário com o mesmo nome da requisiçãoDoUsuárioNoNavegador
+                //          (Ação), contendo o objeto retornado da operação (ação / método do
+                //          controlador).               
+            }
         }
     }
 }

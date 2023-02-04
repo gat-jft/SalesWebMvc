@@ -1,0 +1,82 @@
+﻿@model SalesWebMvc_.Net7.Models.ViewModels.SellerFormViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h4>Seller</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <input type="hidden" asp-for="Seller.Id" />
+            <div class="form-group">
+                <label asp-for="Seller.Name" class="control-label"></label>
+                <input asp-for="Seller.Name" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Seller.Email" class="control-label"></label>
+                <input asp-for="Seller.Email" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Seller.BirthDate" class="control-label"></label>
+                <input asp-for="Seller.BirthDate" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Seller.BaseSalary" class="control-label"></label>
+                <input asp-for="Seller.BaseSalary" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Seller.DepartmentId" class="control-label"></label>
+                <select asp-for="Seller.DepartmentId" asp-items="@(new
+           SelectList(Model.Departments,"Id", "Name"))" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--
+    O componente ou elemento <select> é que vai montar prá gente a
+    Caixinha de Seleção.
+    Ele tem um <labe> normal, com o Título "DepartmentId".
+
+    A TagHelper asp-for="" de um elemento <selec> é para eu fazer o
+    BINDING (ligação) do que for digitado na <label> com o Atributo.
+      - No caso, o que eu digitar na <label> será ligado com o campo
+        DepartmentId do Vendedor.
+        Ou seja, será ligado com o Seller.DepartmentId.
+
+    Já a TagHelper asp-item="", o que que ele faz?
+    - Ele vai construir os ítens da Caixinha de Seleção com base em uma
+      coleção que eu passar.
+
+      No caso, a coleção que eu passei foi a "Departments", do Model
+      ARROBAModel na 1a. linha desta View aqui.
+
+      Model é o que está na pasta Models. Todo o caminho que eu passei
+      na 1a. linha desta View aqui:
+      É a coleção "Departments", que é a Listinha<Departamentos> lá da
+      Classe SellerFormViewModel.
+
+      Eu passo esta COLEÇÃO dentro do objeto SelectList.
+      Este objeto, recebe no Construtor 3 argumentos:
+      - 1° argumento:
+           A coleção, no caso a Model.Departments.
+      - 2° argumento:
+           Como é uma listinha, cada objeto no caso é um Department.
+           Aí, este 2° argumento vai falar assim:
+             Qual é o Atributo deste objeto que vai ser a Chave (código)
+             dele?
+             - Vai ser o "Id".
+      - 3° argumento:
+           Qual o atributo deste OBJETO vai aparecer na Caixinha?
+           - Vai ser o "Name".
+
+      - 4° argumento:
+           No BOTÃO PRA ENVIAR O FORMULÁRIO, vai ter a mensagem "Save".
+-->

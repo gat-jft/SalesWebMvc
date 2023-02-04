@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SalesWebMvc_.Net7.Models; // Para enxergar o "Seller".
 using SalesWebMvc_.Net7.Models.ViewModels; // Para ele exergar a Classe "SellerFormViewModel". Usada no Crete(), com [GET] 
 using SalesWebMvc_.Net7.Services;
+using SalesWebMvc_.Net7.Services.Exceptions; // Para ele importar (ou enxergar) o NotFoundException e o DbConcurrencyException
+using System.Linq.Expressions;
 
 namespace SalesWebMvc_.Net7.Controllers
 {
@@ -10,7 +13,6 @@ namespace SalesWebMvc_.Net7.Controllers
         // Pra que o Index() chame o FindAll() lá do SellerService, vamos ter que declarar uma dependência (Property, não injeção de dependência que é outra coisa) com o SellerService.
         private readonly SellerService _sellerService;
         private readonly DepartmentService _departmentService;
-
 
 
         // Vamos fazer o nosso Construtor pra ele injetar as dependências (atributos
@@ -254,7 +256,7 @@ namespace SalesWebMvc_.Net7.Controllers
             // Ela terá que ter o mesmo nome deste Método aqui, claro!
             // 
             // Se o objeto Seller existir, retorna a View (tela) de 1 Seller (Vendedor).
-            return View(obj); 
+            return View(obj);
         }
 
         // Vamos criar agora uma outra Ação Delete, só que agora vai ser POST.
@@ -294,7 +296,161 @@ namespace SalesWebMvc_.Net7.Controllers
 
             // No final, passando por tudo acima, se o objeto Seller (Vendedor) existir,
             // retorna a View (tela) de 1 Seller (Vendedor)
-            return View(obj); 
+            return View(obj);
+        }
+
+        // Ação Edit, com o método GET (não altera nada no sistema).
+        //
+        // Esta Ação Edit, ela serve prá abrir a telinha pra editar o nosso Vendedor
+        //
+        // No caso, ela recebe um Id como argumento, que pode ser OPCIONAL.
+        // - Esse OPCIONAL (?), na verdade é só pra evitar de acontecer algum erro 
+        //   execução.
+        // - Na verdade, ele é OBRIGATÓRIO.
+        // - Inclusive, eu já comecei a implementação testando se este Id for igual
+        //   a NULO.
+        public IActionResult Edit(int? id)
+        {
+            // Se o id for NULO, retorna só uma mensagem de "Não Encontrado"
+            if (id == null)
+            {
+               // Por enquanto:
+               return NotFound();
+            }
+
+            // Testar se este "id" realmente existe no Banco de dados.
+            //
+            // Para verificar, eu vou usar o FindById(int id) do serviço
+            // SellerService injetado aqui no construtor, para a dependência
+            // (_sellerService).
+            //
+            // No FindById() o (int) id é obrigatório.
+            // Aqui neste Edit, o (int?) id que ele está usando é OPCIONAL(?).
+            // - Aí, o compilador não tava aceitando, dizendo que não tem como converter
+            //   um int? para int.
+            // - Mas, se eu colocar o ".Value" depois da variável int, eu estou dizendo que
+            //   é para pegar o VALOR do id.
+            //   Ou seja, ele é obrigatório.
+            //   Aí, não dá mais conflito (erro).
+            //
+            // Eu poderia fazer este teste com 1 "if" apenas, sem criar uma variável, assim:
+            //    if (_sellerService.FindById(id.Value) { return NotFound(); }.
+            //    
+            // Ou posso também, prá fazer isso, eu fazer o "var obj = ...".
+            // Porque dessa forma foi melhor?
+            // - Porque o FindById retorna um objeto (tipo Seller). E com este objeto em mãos, 
+            //   ele vai para uma variável tipo var, que eu dei o nome de "obj".
+            //   E com este objeto em mãos, ele pode ser retornado para uma View,
+            //   no "return View();"
+            // - Usando "if", eu  teria que criar a variável "obj" fora dele, pois o Seller
+            //   capturado dentro dele, quando o "if" fosse fechado, ela perderia o escopo.
+            //   
+            // Na variável obj, pode ter um objeto (tipo Seller) ou NULO (quando não há objeto).
+            // Se for NULO, retorna o Método NotFound().
+            var obj = _sellerService.FindById(id.Value);
+            if (obj == null)
+            {
+                // Este NotFound() é provisório.
+                // Na proxima aula, eu vou aprender a retornar uma página personalizada de ERRO.
+                return NotFound(); 
+            }
+
+            // Testei se o id não existe (1° if). Testei se o id é NULO (2° if).
+            // Se tudo isso passar, é sinal que na obj tem um objeto (Seller).
+            // Agora sim, eu vou abrir a minha tela de edição.
+            //
+            // Prá abrir essa Tela de Edição, eu tenho que carregar os Departamentos, prá
+            // POVOAR a minha caixinha de Seleção. 
+            // Para carregar os Departamentos, eu vou chamar o serviço _departmentService.
+            List<Department> departments = _departmentService.FindAll();
+
+            // Agora eu vou criar objeto (chamado "viewModel") do tipo SellerFormViewModel.
+            //
+            // E aí, eu já vou passar os dados prá ele. Quem vai ser os dados?
+            // - O "Seller", eu vou iniciar ele com o "obj", que é este objeto que nós buscamos
+            //   do Banco de Dados, com a chamada "_sellerService.FindById(id.Value);".
+            //   Como eu estou fazendo uma EDIÇÃO, eu vou preencher meu formulário com os
+            //   dados do objeto existente;
+            // - O "Departments", vai ser a Listinha "departments" que eu acabei de carregar.
+            //
+            // Como ele não tem um Construtor para receber os dados nos (), eu vou passar os
+            // dados diretamente (já começando a passar os dados { }).
+            // Quando eu não tenho () para passar os dados, eu uso as {}.
+            SellerFormViewModel viewModel = new SellerFormViewModel{Seller = obj, Departments = departments };
+            
+            // Instanciamos o nosso ViewModel, então agora vou RETORNAR uma View, passando este
+            // ViewModel como argumento:
+            return View(viewModel);            
+        }
+
+        // Vamos criar a Ação Edit, para o método POST.
+        // Neste caso, a Ação vai receber o id, e também o objeto Seller.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Seller seller)
+        {
+            // Como que nós vamos implementar esta Ação?
+
+            // 1ª coisa:
+            //    Eu vou testar se o "id", que veio aqui no parâmetro do Método
+            //    for diferente do "Id do seller" também do parâmetro, significa
+            //    que alguma coisa tá errada.
+            //    Ou seja, o Id do Vendedor que eu estou atualizando, não pode ser
+            //             diferente do id da URL da requisição.
+            if (id != seller.Id)
+            {
+                // Se isso acontecer, por enquanto eu vou chamar o BadRequest().
+                return BadRequest();
+            }
+
+            // Se passar pelo "if" acima, significa que tá OK.
+            // Aí, eu vou chamar o meu "_sellerService.Update()" do meu "seller"
+            //_sellerService.Update(seller);
+
+            // Feito a ATUALIZAÇÃO do Vendedor (comando anterior), eu vou
+            // Redirecionar a minha REQUISIÇÃO (ação) para a página inicial
+            // do CRUD, que é a Index.
+            //
+            // Então eu vou chamar aqui "return RedirectToAction", e aí eu vou
+            // chamar "(nameof(Index))";
+            //return RedirectToAction(nameof(Index));
+
+            // Só que aí é aquela coisa:
+            // Esta chamada do Update(seller), ela pode lançar EXCEÇÕES a nível da
+            // camada de Dados:
+            // - Ela pode lançar aqui tanto um NotFoudException quanto um DbConcurrencyException.
+            //
+            // Então, eu vou fazer o seguinte:
+            // Aqui no controlador, esta chamada ("_sellerService.Update(seller); E
+            // "return RedirectToAction(nameof(Index));") dentro de um "try".
+            //
+            // Para isso, COMENTEI (//) esses 2 comandos.
+            try
+            {
+                _sellerService.Update(seller);
+                return RedirectToAction(nameof(Index));
+
+            }
+            // Em seguida, vou fazer os meu "catch´s"
+            catch (NotFoundException)
+            {
+                // Provisóriamente eu vou retornar um NotFound().
+                // Como é provisoriamente, eu uso o return.
+                //
+                // Quando eu já sei qual é a Exceção, eu faço uso do lançamento
+                // da Exceção: uso o "throw new Exceção("");", ao invés do "return NotFound();".
+                // 
+                // NotFound() é um Método SemAção (Tem a ANNOTATION [NonAction], acima dele).
+                // - Ele retorna um NotFoundResult().
+                return NotFound();
+            }
+            // E se também acontecer aquela DbConcurrencyException, eu vou dar
+            // provisóriamente um BadRequest();
+            catch (DBConcurrencyException)
+            {
+                // PedidoRuim();
+                return BadRequest();
+            }       
         }
     }
 }
