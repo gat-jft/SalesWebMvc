@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore; // Para a operação Include().
 using SalesWebMvc_.Net7.Services.Exceptions; // Para o compilador encontrar a Exceção (classe) NotFoundException e a Exceção DbConcurrencyException. 
+using System.Drawing;
 
 namespace SalesWebMvc_.Net7.Services
 {
@@ -127,7 +128,7 @@ namespace SalesWebMvc_.Net7.Services
             _context.SaveChanges();
         }
 
-        // O que que vai ser atualizar um objeto do Tipo Seller?
+        // O que que vai ser atualizar um OBJETO O TIPO Seller?
         //
         // Update() corresponte a Ação de Edit (página) num CRUD.
         // Tanto que, depois de implementar este Método, eu tenho que verificar SE O LINK PRA 
@@ -154,12 +155,14 @@ namespace SalesWebMvc_.Net7.Services
             //
             //if (_context.Seller.Any(x => x.Id == obj.Id) == false), foi substituído pelo abaixo, com 
             // "!" ANTES. Prá dizer que se NÃO (!) EXISTIR O ELEMENTO NO BD, COM O Id == AO Id DO obj.
+            // 
+            // Este "if" quer dizer:
+            // Se NÃO (!) EXISTIR Qualquer (Any) Vendedor. Vendedor x cujo x.Id seja igual ao obj.Id.
             if (!_context.Seller.Any(x => x.Id == obj.Id))
             {
                 // Vou lançar a Exceção NotFoundException, com a MENSAGEM "id not found".
                 throw new NotFoundException("id not found");
             }
-
             // Se passou pelo "if", significa que já existe o objeto lá (no BD).
             // Então, agora, eu vou atualizá-lo:
             // - Eu vou chamar o "_context.Update".
@@ -194,8 +197,7 @@ namespace SalesWebMvc_.Net7.Services
                 _context.SaveChanges(); // Para confirmar a Atualização (Update()).
             }
             catch (DbUpdateConcurrencyException e)
-            {
-                // Então, se acontecer essa Exceção DbUpdateConcurrencyExceptiondo do
+            {                // Então, se acontecer essa Exceção DbUpdateConcurrencyExceptiondo do
                 // ENTITY FRAMEWORK, aí eu vou RELANÇAR uma outra exceção em nível de
                 // Serviço (pasta Services), que vai ser a MINHA (personalizada)
                 // DBConcurrencyException. 
@@ -205,8 +207,6 @@ namespace SalesWebMvc_.Net7.Services
                 throw new DBConcurrencyException(e.Message);
 
 
-
-
                 // Perceba o seguinte:
                 // Prá nossa aplicação ficar TOP em termos de  CAMADAS, o que eu eu estou
                 // fazendo:
@@ -214,7 +214,7 @@ namespace SalesWebMvc_.Net7.Services
                 //   catch (DbUpdateConcurrencyException.
                 // - E eu estou RELANÇANDO esta exceção, só que usando a minha exceção em 
                 //   Nível de Serviço: DBConcurrencyException.
-                // - Isso aqui é muito importante pra SEGREGAR AS CAMADAS:
+                // - Isso aqui é muito importante pra SEGREGAR (isolar) AS CAMADAS:
                 //        A minha camada de Serviço, ela não vai propagar uma exceção do Nível
                 //        de Acesso A Dados.
                 //   Se uma exceção de Nível de Acesso à Dados acontecer, a minha Camada de
@@ -231,8 +231,8 @@ namespace SalesWebMvc_.Net7.Services
                 //     Exceções do Nível de Acesso à Dados (Repositories) são capturadaras
                 //     (bloco catch) pelo Serviço, e RELANÇADAS na forma de exceções do Serviço
                 //     (Serviços) para o controlador.
-                //  Ou seja, na nossa arquitetura geral, o controlador não conversa diretamente
-                //  com os Repositories (acesso a Dados): Antes dos Repositories, vem os Services.
+                //   Ou seja, na nossa arquitetura geral, o controlador não conversa diretamente
+                //   com os Repositories (acesso a Dados): Antes dos Repositories, vem os Services.
                 //
                 //
                 //
@@ -246,53 +246,271 @@ namespace SalesWebMvc_.Net7.Services
                 //
                 //    O Model é dividido em: Serviços - Repositórios / Entidades.
                 //   
-                //    Veja que na Arquitetura Geral, o Controlador não conversa (não manipula
-                //    ou obtém dados) diretamente com um Repositorie (camada de acesso à dados):
+                //    Veja que na Arquitetura Geral, o Controlador NÃO CONVERSA (não manipula
+                //    ou obtém dados) DIRETAMENTE com a Camada de acesso à dados (Repositories):
                 //
-                //    Eu devo implementar:
-                //    - SERVIÇOS para acessar/manipular os Dados das TABELAS do BD.
-                //      Um exemplo é o SellerService, que obtém/manipula os dados da tabela
-                //      Seller. 
+                //    Eu tenho que implementar:
+                //    - Serviços para acessar o BD.
+                //    
                 //
-                //        Serviços (como exemplo o SellerService, DepartmentService) são para
-                //        acessar as TABELAS (repositories) 'Seller' e 'Department'. 
-                //        NÃO são para acessar as Classes (Entidades) Seller e Department. 
+                //    Serviços (pasta SERVICES) é tudo aquilo que eu usarei para o 
+                //    CONTROLADOR possa ter acesso aos dados (REPOSITORIES).
+                //
+                //    Por motivo de organização, os serviços (classes que realizam operações, no BD
+                //    por exemplo), devem ficar na pastinha "Services".
+                //    MAS, dependendo do serviço, ele deve ir para outra pasta a que ele faz mais
+                //    sentido. Por exemplo, o "SeedingService" que eu criei para povoar o BD em tempo
+                //    de execução, ele ficou na pasta "Data" (Dados) junto com o Context (contexto
+                //    do BD).
+                //
+                //    // Como, de acordo com a ARQUITETURA GERAL, em que um Controlador
+                //    // não pode acessar / manipular DIRETAMENTE dados em um REPOSITORIES
+                //    // (camada/pasta de acesso a dados), ele deve usar um SERVICE (camada/pasta)
+                //    // para isso.
+                //
+                //                
+                //    Mas o que são SERVIÇOS?
+                //    - É o que terá nesta pasta "Services"?
+                //      Esta pasta "Services", representa minha camanda de SERVIÇOS,
+                //      chamada "SERVICES" no quadro da ARQUITETURA GERAL.
+                //      NELA TERÁ TUDO (classes: de serviços e exceções) para que eu
+                //      possa obedecer a (o quadro da) ARQUTETURA GERAL?
+                //    - Serviços: classes que eu colocarei métodos (serviços), para
+                //      acessar ou manipular os dados das TABELAS (repositories).
+                //      Exemplo:
+                //         SellerService: classe que terá método (serviços) para
+                //                        manipular ou obter dados da TABELA 'Seller'  do BD.
+                //    - Exceções:
+                //         Classes, que poderão lançar minhas exceções (erros) personalizadas.
+                //         MAS, no nível de Serviços (pasta Services, que EU CRIEI).
+                //         Nível de Serviços, que eu criei. Não que o framework criou ou que
+                //         o ENTITY FRAMEWORK criou.
+                //          
+                //         Estas exceções de serviços personalizadas, serão relançadas, quando
+                //         o ENTITY FRAMEWORK lançar uma exceção da Camada de Dados.
+                //         Exemplo:
+                //         - Toda vez que eu fizer uma operação de Deleção no BD, o ENTITY
+                //           FRAMEWORK poderá lançar a exceção DbUpdateConcurrencyException, sobre
+                //           possível concorrencia do BD.
+                //         - Ele pode lançar também a NotFoundException.
+                //
+                //         Aí, eu coloco dentro de um bloco "try", eu vou colocar a operação para
+                //         Atualização do BD:
+                //         - _contextOuServiço.Update(objeto);
+                //         - _contextOuServico.SaveChanges();
+                //
+                //         1 bloco "catch", e nos () dele eu vou colocar a exceção
+                //         DbUpdateConcurrencyException).
+                //         - No corpo dele, ie nas {}, eu vou colocar a minha exceção personalizada
+                //           DBConcurrencyException (da MINHA camada SERVICES).
+                //           Se eu ainda não tiver uma exceção personalizada, eu posso
+                //           provisoriamente colocar um "return NotFound();.
                 //      
+                //         Outro  bloco "catch", e nos () dele eu vou colocar a exceção
+                //         NotFoundException.
+                //         - No corpo dele, ie nas { }, eu vou colocar a minha exceção personalizada
+                //           NotFoundException (da MINHA camada SERVICES).
+                //           Se eu ainda não tiver uma exceção personalizada, eu posso
+                //           provisoriamente colocar um "return BadRequest();.
                 //
-                //    Foi o que fizemos:
-                //     - Eu fiz 2 Serviços para acessar exceções do BD: estes serviços relançam
-                //              as informações (exceções) do BD (Repositories).
-                //     - Eu fiz 1 Serviço (SeedingService) pra popular o BD.
-                //     - O FRAMEWORK tem 1 Serviço (services.AddDbContext<>) que nos <> eu informo
-                //         qual será o meu Context pra montagem do BD.
-                //     - Eu fiz 1 Serviço (DepartmentService), que depende (injeção de Dependência)
-                //          do nosso Context (que usa Serviços do FRAMEWORK para uma sessão com o BD)
-                //          para Listar os Departamentos.
-                //     - Eu fiz este Serviço aqui (SellerService), que também depende do nosso Context
-                //          para as operações relacionadas à Entidade Seller (Vendedor).
-                //          Com as operações:
-                //          - FindAll (para listar todos os Sellers),
-                //          - FindById (para mostrar 1 Seller, baseado num Id),
-                //          - Insert (Inserir 1 new Seller no BD).
-                //          - Remove (Remover 1 Seller do BD).
-                //          - Update (Atualiza os dados de 1 Vendedor).
+                //         O que eu estou fazendo ao colocar os comandos para Atualização do
+                //         BD num bloco "try-catch"?
+                //         - Eu estou respeitando a ARQUITETURA GERAL. Como?
+                //           Como um CONTROLADOR (camada "Controller") não pode ter acesso diretamente a um
+                //           REPOSITORIES (subDivisão da Camada "Model"), ele na sequência da ARQUITETURA GERAL
+                //           deve ir para um SERVICES (subDivisão da Camada "Model").
+                //
+                //           Ou seja, ele deve usar uma Classe (que pode ser uma exceção ou serviço),
+                //           para quaisquer atividades ligadas à ACESSO à dados (REPOSITORIES):
+                //           Seja uma exceção lançada pelo FRAMEWORK, alteração no BD, acesso (leitura)
+                //           de um BD.
+                //         
+                //         - Assim, no exemplo dos comando de atualização no BD dentro de um bloco
+                //           "try-catch", eu tento atualizar o BD:
+                //             Se der algum erro, este erro será lançado pelo ENTITY FRAMEWORK.
+                //             Eu capturo este erro, e RELANÇO (throw) este erro na usando a
+                //             mensagem (e.message) que o ENTITY FRAMEWORK lançou na minha exceção
+                //             personalizada.
                 //      
-                //      Assim, para um projeto bem feito (que segue uma arquitetura geral), um
-                //      Controlador, por exemplo o SellersController, nunca terá acesso diretamente
-                //      a um repositorie (CAMADA que acessa Dados).
-                //      UM controlador deverá, através da CAMADA de Serviços, acessar a Camada de
-                //      Acesso à Dados (repositorie).
-                //        - Ele é uma Classe que herda da Controller (superClasse).
-                //        - Ele é uma Classe então com suporte à View (página Razor).
-                //        - Com ele eu não devo acessar ou manipular um Banco de Dados, DIRETAMENTE:
-                //              Mas com os Serviços injetados nele (no controlador) para isso.
-                //        - Assim, as Ações (requisições) do usuário, ele (controlador) vai usar os
-                //          serviços injetados nele, e com o retorno desses serviços - como um
-                //          controlador HERDA de uma Classe que tem suporte a View, ele também
-                //          terá suporte a View - geralmente ele retornará uma View (pagina .cshtml)
-                //          para o usuário com o mesmo nome da requisiçãoDoUsuárioNoNavegador
-                //          (Ação), contendo o objeto retornado da operação (ação / método do
-                //          controlador).               
+                //          - Assim eu respeito a ARQUITETURA GERAL:
+                //            Um erro (da camada Model/Repositories) não pode ser lançado 
+                //            DIRETAMENTE. Capturo ele e o RELANÇO, fazendo com que ele vá para
+                //            a camada Model/Services. Prá depois eu lançar. 
+                //
+                //    
+                //
+                //
+                //
+                //
+                //
+                //     Como eu crio um Serviço (classe que vai ter operações para acesso à Dados)???
+                //       Para cada TABELA do BD, eu crio uma Classe (serviço).
+                //       Exemplo: Para a TABELA Seller, eu terei a Classe (o serviço) para acessar
+                //                os dados da TABELA 'Seller'.
+                //                
+                //                Obedecendo o PADRÃO de Nomes do FRAMEWORK, este Serviço (Classe)
+                //                terá o NOME 'SellerService":
+                //                Classe que terá operações para manipular / obter dados da TABELA
+                //                'Seller'.
+                //
+                //     Este serviço, ele vai ter um Tipo Context, ie um BD injetado AUTOMATICAMENTE
+                //     nele, toda vez que ele for solicitado (criado).
+                //     -Este Context será atribuído a um Atributo "readonly".
+                //      Com isso, este meu serviço terá uma dependência com o BD.
+                //
+                //                              
+                //     Num Serviço (Classe) eu implemento os métodos que eu usarei para manipular
+                //     (POST) ou obter (GET) dados de uma TABELA do db.
+                //
+                //     Então, 1 serviço está relacionado com uma TABELA do bd.
+                //     
+                //     Ou seja, para cada TABELA, eu crio um Serviço (classe só com métodos para
+                //     acessar / manipular dados de uma TABELA).            
+                //
+                //
+                //
+                //
+                //
+                //
+                // Resumindo então a ARQUITETURA GERAL de um projeto MVC com Entity Framework:
+                //
+                // View/ Controller/ Model (subdividido em SERVICES, REPOSITORIES, ENTITIES).
+                //
+                // Views (pasta/camada com as minhas Views ou telas):
+                //    São Páginas Razor (arquivos .cshtml), que renderizam uma tela no navegador.
+                //
+                //    Elas devem ter o mesmo nome do Método (Ação) do Controlador. 
+                //
+                //   Elas podem ser ao mesmo tempo a requisição (quando renderizada usando o GET
+                //   do Controlador) ou resposta (usando o POST no Controlador).
+                //   - O FRAMEWORK, através do controlador saberá inteligentemente identificar 
+                //     quando se trata de um requisição ou resposta HTTP.
+                //
+                //
+                //
+                // 
+                // Controllers (pasta/camada com que terá os Controladores):  
+                //    Como um CONTROLADOR não pode conversar DIRETAMENTE com a REPOSITORIES,
+                //    de acordo com a ARQUITETURA GERAL, um CONTROLADOR que precisar usar dados
+                //    da TABELA 'Seller' por exemplo, ele vai ter que conversar com um SERVICE
+                //    (classe que tem o métodos, ie os serviços que manipulam/acessam dados)
+                //    da TABELA 'Seller', que no caso nós temos é o SellerService.
+                //   
+                //    E como o CONTROLADOR fará para obter/ler dados, OU lançar um exceção da
+                //    Camada REPOSITORIES?
+                //    - Através de um Serviço (camada Services), da camada Model/Services.
+                //
+                //    - injeto no Construtor dele, um serviço (classe com operações em uma TABELA
+                //      do BD).
+                //      // Lembrando que estas Classes serviços carregam o BD (que tem as TABELAS).
+                //      //
+                //      // E que eu devo registrar este serviço no Sistema de Injeção de Dependência
+                //      // do FRAMEWORK:
+                //      // - No ConfigureServices() lá da Startup, coloco
+                //      //   "services.AddScoped<ClasseServiço>;".
+                //      //
+                //      // Um Serviço (Classe) registrado no ConfigureServices() da Startu, será um
+                //      // executado mediante uma solicitação HTTP.
+                //      // OU seja, quando o usuário faz uma requisição. É um serviço em tempo de
+                //      //          execução, com um tempo de vida baseado a cada solicitação.
+                //      //
+                //      // Um Serviço (Classe) registrado no Configure() da Startup.cs, eu já o
+                //      // coloco no parâmetro do Configure().
+                //      // Este serviço, vai ser executado toda vez que eu rodar o programa.
+                //      // OU seja, é também em tempo de execução, mas toda vez que eu rodo o
+                //      //          programa, ele é executado. É o caso do SeedingService.cs, que
+                //      //          toda vez que o programa é rodado, ele vai no BD e verifica se
+                //      //          há dados nas TABELAS.
+                //      //          Se não tiver nenhum dado, ele POVOA (automaticamente) a TABELA,
+                //      //          com os dados que estão implementados na SeedingService.
+                //
+                //    Então, o CONTROLADOR terá injetado no Construtor dele, o serviço que irá fazer
+                //    operações (para manipular ou obter dados na TABELA) no BD referente ao nome dele
+                //    + o serviço que irá fazer operações na TABELA relacionada à ele.
+                //    Exemplo:
+                //      O Controlador de Vendedores (SellersController) irá ter no Construtor dele a 
+                //      SellerService + a DepartmentService).
+                //
+                //
+                //
+                //
+                //
+                //    Models (modelos), é uma pasta ou camada do meu projeto.
+                //    Ela tem sub-pastas: Services, Repositories, Models (Entities).
+                //    
+                //    A pasta 'Models' ela já vem na estrutura do projeto MVC.
+                //    Nela, eu coloco as Entidades (Seller, Department, Aluno etc) do meu negócio.
+                //    Que são os modelos do meu negócio.
+                //
+                //    Na 'Services' (pasta/sub-camada de SERVICES) que terá os serviços para acesso a
+                //                  dados (pasta/sub-camada REPOSITORIES) + as exceções lançadas pelo
+                //                  ENTITY FRAMEWORK (que cuida do BD).
+                //             
+                //
+                //       Mas o que é um SERVIÇO???
+                //       - Serviço é uma Classe, que terá os métodos (serviços) para manipulação / acesso
+                //         a dados da minha Aplicação.
+                //         Exemplos do métodos desta Classe:
+                //         - o Update(), Remove(), Insert(), FindAll() para listar todos os elementos,
+                //           Insert() etc.    
+                //
+                //       - O Nome que eu dou para um Serviço (Classe que eu criar), será de acordo com
+                //         o Nome da TABELA. 
+                //           Exemplos:
+                //           - "SellerService" é o nome do serviço (classe) que tem método para acessar
+                //                  manipular dados da TABELA) 'Seller';
+                //           - "DepartmentService", é o nome do serviço para manipular / obter dados da
+                //                  TABELA 'Department'.
+                //                  (repositories) 'Seller' e 'Department'. 
+                //
+                //       Um serviço NÃO é para acessar Membros das Classes (Entidades).
+                //       É para acessar uma TABELA do BD. 
+                //   
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                //
+                // Foi o que fizemos:
+                //  - Eu fiz 2 EXCEÇÕES:
+                //       - Cada uma delas, será RELANÇADA com a mensagem de erro de uma exceção da Camada de
+                //         REPOSITORIES (Model/Repositoris), mensagem esta lança pelo ENTITY FRAMEWORK.
+                //         Num bloco "try-catch".                
+                //  - Eu fiz 1 Serviço (SeedingService) pra popular o BD.
+                //  - O FRAMEWORK tem 1 Serviço (services.AddDbContext<>) que nos <> eu informo qual será o
+                //    meu Context (BD) que eu vou injetar AUTOMATICAMENTE em outras Classes (Serviços).       
+                //  - Eu fiz 1 Serviço (DepartmentService), que depende (injeção de Dependência)
+                //       do nosso Context (que usa Serviços do FRAMEWORK para uma sessão com o BD)
+                //       para Listar os Departamentos.
+                //  - Eu fiz este Serviço aqui (SellerService), que também depende do nosso Context
+                //       para as operações relacionadas à Entidade Seller (Vendedor).
+                //       Com as operações:
+                //       - FindAll (para listar todos os Sellers),
+                //       - FindById (para mostrar 1 Seller, baseado num Id),
+                //       - Insert (Inserir 1 new Seller no BD).
+                //       - Remove (Remover 1 Seller do BD).
+                //       - Update (Atualiza os dados de 1 Vendedor).
+                //   
+                //   Assim, para um projeto bem feito (que segue uma arquitetura geral), um
+                //   Controlador, por exemplo o SellersController, nunca terá acesso diretamente
+                //   a um repositorie (CAMADA que acessa Dados).
+                //   UM controlador deverá, através da CAMADA de Serviços, acessar a Camada de
+                //   Acesso à Dados (repositorie).
+                //     - Ele é uma Classe que herda da Controller (superClasse).
+                //     - Ele é uma Classe então com suporte à View (página Razor).
+                //     - Com ele eu não devo acessar ou manipular um Banco de Dados, DIRETAMENTE:
+                //           Mas com os Serviços injetados nele (no controlador) para isso.
+                //     - Assim, as Ações (requisições) do usuário, ele (controlador) vai usar os
+                //       serviços injetados nele, e com o retorno desses serviços - como um
+                //       controlador HERDA de uma Classe que tem suporte a View, ele também
+                //       terá suporte a View - geralmente ele retornará uma View (pagina .cshtml)
+                //       para o usuário com o mesmo nome da requisiçãoDoUsuárioNoNavegador
+                //       (Ação), contendo o objeto retornado da operação (ação / método do
+                //       controlador).               
             }
         }
     }

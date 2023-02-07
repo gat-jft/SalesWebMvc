@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using SalesWebMvc_.Net7.Models; // Para enxergar o "Seller".
 using SalesWebMvc_.Net7.Models.ViewModels; // Para ele exergar a Classe "SellerFormViewModel". Usada no Crete(), com [GET] 
 using SalesWebMvc_.Net7.Services;
 using SalesWebMvc_.Net7.Services.Exceptions; // Para ele importar (ou enxergar) o NotFoundException e o DbConcurrencyException
-using System.Linq.Expressions;
+using System.Diagnostics; // Para ele reconhecer a Classe Activity, que eu chamei na Ação Error.
+using System.Linq;
 
 namespace SalesWebMvc_.Net7.Controllers
 {
@@ -222,7 +226,24 @@ namespace SalesWebMvc_.Net7.Controllers
                 // Este NotFound(), ele instancia uma resposta básica.
                 // Depois (mais prá frente no Curso), nós vamos personalizar
                 // este retorno com uma PÁGINA DE ERRO.
-                return NotFound();
+                //return NotFound();
+
+
+                // Como nós já personalizamos nossa página de erro (ErrorViewModel), nós não
+                // vamos usar o "return NotFound();" ou o "return BadRequest();" mais.
+                //
+                // No lugar destes comandos, nos vamos redirecionar para a Ação Error
+                // (nameof(Error).
+                // - E esta Ação Error, ela recebe um argumento. Prá passar este argumento,
+                //   eu vou criar aqui um objeto ANÔNIMO, 
+                //
+                // - Nos "" do objeto ANÔNIMO, eu vou colocar a mensagem que eu quiser.
+                //       No caso aqui de Deletar (Ação Delete) e o id não foi fornecido
+                //       (provided), eu vou colocar "Id not provided".
+                //
+                // É assim que eu vou Redirecionar pra minha Página (Action) de Erro.
+                // Posso dar um CTRL C, porque eu vou usar bastante prá colar.                
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
             // Próximo passo então, é pegar este objeto que eu estou mandando
@@ -245,7 +266,12 @@ namespace SalesWebMvc_.Net7.Controllers
             // - Aí, a variável "obj" ACIMA terá o valor NULL.
             if (obj == null)
             {
-                return NotFound();
+                // Substituído pelo Redirecionamento para a Página de Erro abaixo.
+                //return NotFound();
+
+                // Como eu mandei procurar o Id (FindById()), e o Id não existia, então a
+                // mensagem é "Id not found".
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
             // Agora se tudo deu certo, eu vou mandar ESTE meu Método
@@ -270,6 +296,7 @@ namespace SalesWebMvc_.Net7.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
         // Vamos criar a Ação Details(), no método GET.
         // Esta ação vai receber um id OPCIONAL.
         //
@@ -285,13 +312,24 @@ namespace SalesWebMvc_.Net7.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                // Foi substituído pelo RedirectToActio(nameof(Error, ...) abaixo;
+                //return NotFound();
+
+
+                // Se o id não foi fornecido na requisição, eu vou Redirecionar pro erro
+                // "id not provided".
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
             var obj = _sellerService.FindById(id.Value);
             if (obj == null)
             {
-                return NotFound();
+                // Substituído pelo RedirectToAction(nameof(Error), new ...) abaixo:
+                //return NotFound();
+
+                // Se eu buscar o id e ele não existir, eu vou Redirecionar pro ERRO
+                // "Id not found";.
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
             // No final, passando por tudo acima, se o objeto Seller (Vendedor) existir,
@@ -314,8 +352,11 @@ namespace SalesWebMvc_.Net7.Controllers
             // Se o id for NULO, retorna só uma mensagem de "Não Encontrado"
             if (id == null)
             {
-               // Por enquanto:
-               return NotFound();
+                // Substituído pelo RedirectToAction da mensagem de ERRO, abaixo
+                //return NotFound();
+
+                //
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
             // Testar se este "id" realmente existe no Banco de dados.
@@ -351,8 +392,11 @@ namespace SalesWebMvc_.Net7.Controllers
             if (obj == null)
             {
                 // Este NotFound() é provisório.
+                // Foi substituído pelo RedirectToAction(Error) abaixo:
                 // Na proxima aula, eu vou aprender a retornar uma página personalizada de ERRO.
-                return NotFound(); 
+                //return NotFound();
+
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
             // Testei se o id não existe (1° if). Testei se o id é NULO (2° if).
@@ -376,11 +420,11 @@ namespace SalesWebMvc_.Net7.Controllers
             // Como ele não tem um Construtor para receber os dados nos (), eu vou passar os
             // dados diretamente (já começando a passar os dados { }).
             // Quando eu não tenho () para passar os dados, eu uso as {}.
-            SellerFormViewModel viewModel = new SellerFormViewModel{Seller = obj, Departments = departments };
-            
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
+
             // Instanciamos o nosso ViewModel, então agora vou RETORNAR uma View, passando este
             // ViewModel como argumento:
-            return View(viewModel);            
+            return View(viewModel);
         }
 
         // Vamos criar a Ação Edit, para o método POST.
@@ -399,8 +443,19 @@ namespace SalesWebMvc_.Net7.Controllers
             //             diferente do id da URL da requisição.
             if (id != seller.Id)
             {
+                // Provisório.
                 // Se isso acontecer, por enquanto eu vou chamar o BadRequest().
-                return BadRequest();
+                //
+                // Como já temos uma pagina de erro, agora, quando for um BadRequest,
+                // eu vou Redirecionar prá Página de Erro (Ação Error).
+                //return BadRequest();
+
+                // Eu mandei Editar um Vendedor. 
+                // Só que o id (int id) que que passei na URL era diferente do id do 
+                // Seller.
+                //
+                // Ai, neste caso, eu vou dar a mensagem que "os id´s não correspondem"
+                return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
             }
 
             // Se passar pelo "if" acima, significa que tá OK.
@@ -432,25 +487,112 @@ namespace SalesWebMvc_.Net7.Controllers
 
             }
             // Em seguida, vou fazer os meu "catch´s"
-            catch (NotFoundException)
+            catch (NotFoundException e)
             {
                 // Provisóriamente eu vou retornar um NotFound().
                 // Como é provisoriamente, eu uso o return.
+                // 
+                // Depois que eu tiver implementado a Ação com a Página de Erro, eu vou
+                // retonar a página de erro.
                 //
                 // Quando eu já sei qual é a Exceção, eu faço uso do lançamento
                 // da Exceção: uso o "throw new Exceção("");", ao invés do "return NotFound();".
                 // 
                 // NotFound() é um Método SemAção (Tem a ANNOTATION [NonAction], acima dele).
                 // - Ele retorna um NotFoundResult().
-                return NotFound();
+                //
+                // Substituído pelo
+                // return RedirectToAction(nameof(Error, new { ... }) abaixo.
+                //return NotFound();
+
+                // No caso aqui, eu estou tratando a possível exceção NotFoundException.
+                // Como é uma EXCEÇÃO, e a Exceção ela carrega uma mensagem, o que que
+                // eu vou fazer?
+                // - Eu vou colocar na frente da DECLARAÇÃO Exceção nos (), um apelido prá
+                //   ela, por exemplo o apelido e.
+                //
+                // - E na hora de Redirecitonar prá minha página de Erro, a mensagem
+                //   que eu vou colocar vai ser a mensagem da Exceção (e.Message).
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
             // E se também acontecer aquela DbConcurrencyException, eu vou dar
             // provisóriamente um BadRequest();
-            catch (DBConcurrencyException)
+            catch (DBConcurrencyException e)
             {
-                // PedidoRuim();
-                return BadRequest();
-            }       
+                // BadRequest = PedidoRuim();
+                //
+                // Sustituído pelo RedirecionamentoParaAção(Error) abaixo, que é a nossa
+                // Página de Erro.
+                //return BadRequest();
+
+                // E na hora de Redirecitonar prá minha página de Erro, a mensagem
+                // que eu vou colocar vai ser a mensagem da Exceção (e.Message).
+                //
+                // e é o APELIDO que eu dei prá Exceção DbConcurrencyException
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
+
+
+            // Eu posso tirar os 2 "catch" e deixar só 1.
+            // Mas para isso, eu tenho que colocar nos () deste "catch" o 
+            // ApplicationException.
+            //
+            // Porque que isso funciona?
+            // - Porque o ApplicationException é um SUPERtipo da 2 Exceções
+            //   (NotFoundException e DbConcurrencyException).
+            //   Então, por meio de UPCASTING, as 2 Exceções podem casar com 
+            //   ApplicationException.
+            //
+            //
+            // Ficando assim:
+            //catch (ApplicationException e)
+            //{
+            //    return RedirectToAction(nameof(Error), new { message = e.Message });
+            //}
+        }
+
+        // Ação Error, recebendo um string message como argumento.
+        public IActionResult Error(string message)
+        {
+            // O que que esta Ação vai fazer?
+
+            // 1ª coisa:
+            // Eu vou instanciar aqui um ViewModel.
+            // - Como ele não tem Construtor, isto é (), eu vou usar as {}
+            //     "var" é um tipo genérico: posso usar ele prá tudo.
+            //
+            // Eu poderia no lugar do "var", colocar o tipo ErrorViewModel. 
+            var viewModel = new ErrorViewModel
+            {
+                // Quando é instanciação usando {}, os Atributos são 
+                // separados por ','.
+                // - Se eu usar ';' dá erro.
+                Message = message,
+
+                // E quem que vai ser o RequestId da minha requisição?
+                //
+                // Aí, eu vou usar um MACETINHO interno do FRAMEWORK, prá eu
+                // pegar (atribuir à uma variável) o Id interno da requisição:
+                //
+                // Eu vou pegar (atribuir à uma variável, no caso RequestId) assim: 
+                // Activity.Current?.Id ?? HttpContext.TraceIdentifier.
+                //   - Activity: Classe que pertence ao namespace System.Diagnostics;
+                //     Currenty?.Id:
+                //        Esse Currenty ele é OPCIONAL, por causa da '?';
+                //        Se ele (Currenty) for nulo, aí eu vou usar o ...
+                //   - operador "??"
+                //        OPERADOR de COALESCÊNCIA NULA.                               
+                //   - HttpContext.TraceIdentifier:
+                //        Aí (se ele for nulo), eu vou dizer então, que eu vou querer
+                //        então no lugar o objeto HttpContext.TraceIdentifier. 
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+
+            // Criamos nosso objeto viewModel (no comando anterior).
+            //
+            // Agor, eu vou mandar retornar 1 View, passando este objeto "viewModel"
+            // como argumento.
+            return View(viewModel);
         }
     }
 }
