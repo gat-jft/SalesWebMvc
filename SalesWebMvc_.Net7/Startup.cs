@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Globalization; // Para formatação de números e datas
+using Microsoft.AspNetCore.Localization; // Para definir a localização da nossa Aplicação. Vamos definir como sendo a dos Estados Unidos, que é a mais genérica de todas.  
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SalesWebMvc_.Net7.Data;
 using SalesWebMvc_.Net7.Models;
 using SalesWebMvc_.Net7.Services;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Builder;
+
+
 
 namespace SalesWebMvc_.Net7
 {
@@ -80,12 +84,63 @@ namespace SalesWebMvc_.Net7
         // Este método é chamado pelo tempo de execução. Use este método para configurar o pipeline de solicitação HTTP.
         public void Configure(IApplicationBuilder app, IHostEnvironment env, SeedingService seedingService)
         {
+            // Variáveis "enUs" e "localizationOption":
+            // Nelas, vamos colocar algumas configurações prá definir o locale da
+            // aplicação, como sendo dos Estados Unidos.
+            var enUs = new CultureInfo("en-US");
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                // Este objeto RequestLocalizationOptions, vai ter os seguintes dados
+                // (ATRIBUTOS):
+                // - DefaultRequestCulture,
+                // - SupportedCultures e
+                // - SupportedUICultures_
+
+                // 1 -  Qual vaI ser o locale padrão da minha Aplicação. 
+                DefaultRequestCulture = new RequestCulture(enUs),
+                
+                // 2 - Quais são os locales possíveis da minha Aplicação?
+                //     - Eu vou criar então, um new List<CultureInfo>.
+                //     - Aí, eu vou colocar nesta Lista, somente o meu objeto enUs.
+                SupportedCultures = new List<CultureInfo> { enUs },
+
+                // 3 - 
+                SupportedUICultures = new List<CultureInfo> { enUs }
+            };
+
+            // Definimos as opções de localização (variáveis enUs e localizationOptions), 
+            // agora vamos usar este comando abaixo, passando este objeto
+            // (localizationOptions) nosso de localização:
+            app.UseRequestLocalization(localizationOptions);
+
+
+
+
+
+
             if (env.IsDevelopment())
             {
+                // O que ambiente de desenvolvimento?
+                // - É a IDE.
+                //     // Assim, POR ENQUANTO, toda vez que nosso programa é RODADO, ele está
+                //     // nesse ambiente (IDE) de desenvolvimento 
+                //
+                // Assim,
+                // - toda vez que rodamos nossa aplicação, como estamos executano pela
+                //   IDE, a aplicação (o objeto app) chama o método UseDeveloperExceptionPage(), que captura
+                //   uma Exceção síncrona e assíncrona, de uma pipeline, e gera uma resposta de 
+                //   Erro HTML.
+                // - O método SeedingService.Seed() é executado.                
+                
                 app.UseDeveloperExceptionPage();
 
                 // Com esta operação (Seed()) eu vou popular a minha base de dados, caso ela não esteja populada ainda.
-                seedingService.Seed();  
+                //
+                // Este nossa serviço será executado no Ambiente de Desenvolvimento (IDE).
+                // Então, toda vez que eu RODAR minha aplicação (na IDE), ele irá verificar
+                // se o BD está vazio ou não. 
+                // - Se tiver, ele será povoado.
+                seedingService.Seed();
             }
             else
             {

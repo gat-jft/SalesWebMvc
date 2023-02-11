@@ -1,6 +1,8 @@
 ﻿using System; // Para o DateTime, cw etc.
 using System.Collections.Generic; // Para o Tipo ICollection<T> (interface), que tanto pode ser uma Lista como um 
+using System.ComponentModel.DataAnnotations; // Para usar o ANNOTATION [Display]
 using System.Linq; // Para operações em Coleções (Lista, BD, HasSet, Arquivo etc) usando o Linq. .
+using System.Net;
 
 
 namespace SalesWebMvc_.Net7.Models
@@ -15,8 +17,25 @@ namespace SalesWebMvc_.Net7.Models
 
         public int Id { get; set; }
         public string? Name { get; set; }
+
+        [DataType(DataType.EmailAddress)]  // Transforma o email de um texto plano para um LinkDeEmail (com o sublinhado em baixo do texto).
         public string? Email { get; set; }
+
+        // ANNOTATION [Display] serve para o que que eu quero que aparece de rótulo lá nas minhas telas.
+        // 
+        // Então, se eu não colocar [Display] aqui, o framework irá colocar o nome do Atributo.
+        //
+        // Mas, colocando o ANNOTATION [Display()], o Name = será como todas as minhas telas irá 
+        // mostrar. No caso, em qualquer View que for exibir este Atributo, o rótulo (etiqueta)
+        // terá "Birth Date" (com ESPAÇO), e não "BirthDate".
+        [Display(Name = "Birth Date")]          // Para mostrar o rótulo (Label) "Birth Date" (separado), e não "BirthDate" 
+        [DataType(DataType.Date)]               // DataType é o TipoDoDado, não TipoDeData. NÃO CONFUNDIR ENTÃO.    // No caso. o tipoDoDado é um Tipo Data.
+        [DisplayFormat(DataFormatString = "{0: dd/MM/yyyy}" )] // Para exibir a Data como "dd/MM/YYYY"
         public DateTime BirthDate { get; set; } // DataDeNascimento
+
+        
+        [Display(Name = "Base Salary")]   // Customizamos para que o Nome deste Dado quando for aparecer num no rótulo (label), será exibido "Base Salary" (separado) e não + "BaseSalary". 
+        [DisplayFormat(DataFormatString = "{0:F2}")]  // Para formatar um número com 2 casas decimais. Nas {}, 0 (Zero) indica o valor do Atributo. . E este valor vai ter a formatação F2.
         public double BaseSalary { get; set; } // Salário
 
         // Associação 1 prá 1: Vendedor "TEM 1" (é composto por 1) Departamento. 

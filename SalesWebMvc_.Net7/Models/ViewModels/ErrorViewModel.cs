@@ -21,7 +21,7 @@ namespace SalesWebMvc_.Net7.Models.ViewModels
 
 
         // Esta declaração não é uma Property.
-        // Dessa forma isso é um FUNÇÃO:
+        // Escrita dessa forma, isso é um FUNÇÃO:
         // Igual à uma EXPRESSÃO LAMBDA do Linq.
         //   
         // ShowRequestId é uma funçãoZinha, prá testar se o Id existe.

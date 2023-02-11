@@ -41,8 +41,6 @@ namespace SalesWebMvc_.Net7.Controllers
             _sellerService = sellerService;
             _departmentService = departmentService;
         }
-
-        // Métodos do Controlador:
         // - NOTE que eles retornam sempre 1 IActionResult(View, RedirectToAction etc).
         // - Não retornam int, Seller etc.
         // 
@@ -590,8 +588,8 @@ namespace SalesWebMvc_.Net7.Controllers
 
             // Criamos nosso objeto viewModel (no comando anterior).
             //
-            // Agor, eu vou mandar retornar 1 View, passando este objeto "viewModel"
-            // como argumento.
+            // Agor, eu vou mandar retornar 1 View (a Error, claro!), passando este objeto "viewModel"
+            // como argumento. // Que é o arquivo Error.cshtml, na pastinha Views/Shared.
             return View(viewModel);
         }
     }
