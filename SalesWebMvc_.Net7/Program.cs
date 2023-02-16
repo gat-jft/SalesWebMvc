@@ -18,7 +18,7 @@ namespace SalesWebMvc_.Net7
             // ERROS que deram antes de eu adicionar a Startup:
             // - Não conseguia colocar o meu Serviço no Sistema de Injeção de
             //   Dependência. Porque, na Program, ele não consegui manipular
-            //   o Método Configure, no objeto builder. 
+            //   o Método Configure, no objeto builder.
 
             CreateWebHostBuilder(args).Build().Run(); 
         }

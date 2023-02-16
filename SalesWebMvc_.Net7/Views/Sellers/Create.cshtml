@@ -11,21 +11,26 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div> <!-- Sumário (TagHelper asp-validation-summary="All") nada mais é que uma listinha. No caso ela terá as mensagens de validação de um Seller.  Este Seller aqui nesta View é o atributo Seller do objeto (model tipo SellerFormViewModel) usado aqui nesta View. -->
             <div class="form-group">
                 <label asp-for="Seller.Name" class="control-label"></label>
                 <input asp-for="Seller.Name" class="form-control" />
+                <span asp-validation-for="Seller.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Seller.Email" class="control-label"></label>
-                <input asp-for="Seller.Email" class="form-control" />
+                <input asp-for="Seller.Email" class="form-control" />          
+                <span asp-validation-for="Seller.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Seller.BirthDate" class="control-label"></label>
                 <input asp-for="Seller.BirthDate" class="form-control" />
+                <span asp-validation-for="Seller.BirthDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Seller.BaseSalary" class="control-label"></label>
                 <input asp-for="Seller.BaseSalary" class="form-control" />
+                <span asp-validation-for="Seller.BaseSalary" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Seller.DepartmentId" class="control-label"></label>
@@ -39,24 +44,45 @@
     </div>
 </div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<!-- Este código é um Código JavaScript.
+
+     O que são scripts ARROBAsection e para que são usados?
+     - Uma seção permite adicionar algo em uma visualização que será adicionada ao layout.
+
+     Na nossa View Create, o único elemento, NATURALMENTE que faz parte dela é o model
+     (SellerFormViewModel).
+
+     Daí, nós estamos querendo adicionar uma listinha (o TagHelper
+     asp-validation-summary="All").
+
+     Então, pra eu possa entar adicionar ALGO (outros objetos) sem problemas na minha View
+     eu tenho que colocar esta  section:
+     ARROBAsection Scripts { ... }.
+-->
 <!--
-    O componente ou elemento <select> é que vai montar prá gente a 
+    O componente ou elemento <select> é que vai montar prá gente a
     Caixinha de Seleção.
     Ele tem um <labe> normal, com o Título "DepartmentId".
 
     A TagHelper asp-for="" de um elemento <selec> é para eu fazer o
-    BINDING (ligação) do que for digitado na <label> com o Atributo.    
+    BINDING (ligação) do que for digitado na <label> com o Atributo.
       - No caso, o que eu digitar na <label> será ligado com o campo
-        DepartmentId do Vendedor. 
+        DepartmentId do Vendedor.
         Ou seja, será ligado com o Seller.DepartmentId.
 
     Já a TagHelper asp-item="", o que que ele faz?
     - Ele vai construir os ítens da Caixinha de Seleção com base em uma
       coleção que eu passar.
-      
+
       No caso, a coleção que eu passei foi a "Departments", do Model
       ARROBAModel na 1a. linha desta View aqui.
-        
+
       Model é o que está na pasta Models. Todo o caminho que eu passei
       na 1a. linha desta View aqui:
       É a coleção "Departments", que é a Listinha<Departamentos> lá da
@@ -74,5 +100,5 @@
              - Vai ser o "Id".
       - 3° argumento:
            Qual o atributo deste OBJETO vai aparecer na Caixinha?
-           - Vai ser o "Name".        
+           - Vai ser o "Name".
 -->

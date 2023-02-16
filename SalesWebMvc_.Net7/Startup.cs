@@ -34,7 +34,7 @@ namespace SalesWebMvc_.Net7
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-           
+
             // AddMvc().SetCompatibilityVersion está OBSOLETO.
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
 
@@ -51,7 +51,7 @@ namespace SalesWebMvc_.Net7
             // Assim corrigir O VERDINHO (erro) do app.Mvc(routes => routes ...) no método Configure.
             services.AddMvc(options => options.EnableEndpointRouting = false);
 
-            
+
             // ESTE COMANDO NÃO EXISTE NO Startup.cs ORIGINAL. Qq erro, retirá-lo.
             //    - Adiciona serviços para controladores ao
             //      <consulte cref = "IServiceCollection"/> especificado.Este método não registrará
@@ -84,28 +84,54 @@ namespace SalesWebMvc_.Net7
         // Este método é chamado pelo tempo de execução. Use este método para configurar o pipeline de solicitação HTTP.
         public void Configure(IApplicationBuilder app, IHostEnvironment env, SeedingService seedingService)
         {
-            // Variáveis "enUs" e "localizationOption":
-            // Nelas, vamos colocar algumas configurações prá definir o locale da
+            // Se eu colocar um parâmetro no Configure (no caso eu adicionei o Seeding Service seeding), e
+            // se esta Classe estiver registrada no sistema de injeção de depenência (estiver num AddScoped<> por exemplo, 
+            // no método ConfigureServices acima), AUTOMATICAMENTE vai ser resolvido uma instância
+            // deste objeto.
+            // 
+            // Assim, durante toda a minha aplicação, eu terei o objeto seedingService sempre na
+            // na minha aplicação (global). Para que a qualquer requisição (ex. Update de um Seller),
+            // meu BD se não tiver nenhum dado, este serviço (objeto do tipo SeedingService) irá 
+            // povoar as tabelas do BD, com alguns dados definidos neste Serviço.
+
+            // app é um objeto da Classe IApplicationBuilder (que Define uma classe que fornece os
+            // mecanismos para configurar o pipeline de solicitação de um aplicativo.
+
+            // env é um objeto da Classe IHostEnvironment (que fornece informações sobre o ambiente que o 
+            // aplicativo está sendo executado).
+            // Como este objeto env está nos parâmetros deste Configure(), AUTOMATICAMENTE é 
+            // ele é criado. Trazendo consigo as informações de qual ambiente de execução
+            // Existem 2 tipos de ambientes de execução, que uma aplicação pode estar sendo executada:
+            // - Ambiente de Desenvolvimento:
+            //       Ele esta sendo executado numa IDE (ex. Visual Studio);
+            //       // O raciocínio aqui é muito simples: Eu estou no perfil de desenvolvimento (IDE).
+            // - Ambiente de Produção:
+            //       Esse aplicativo já tiver publicado.
+
+            // Variáveis "enUs" e "localizationOption" e "app.UseRequestLocalization(localizationOptions)":
+            // Estes Comandos em conjunto, são para configurar a definição do locale da
             // aplicação, como sendo dos Estados Unidos.
-            var enUs = new CultureInfo("en-US");
+            // 
+            // var enUs, para instanciarmos (criamos) uma Cultura (CultureInfo). Ela vai ser a dos Estados Unidos.
+            var enUS = new CultureInfo("en-US");
             var localizationOptions = new RequestLocalizationOptions
             {
-                // Este objeto RequestLocalizationOptions, vai ter os seguintes dados
-                // (ATRIBUTOS):
+                // Este objeto da Classe (tipo) RequestLocalizationOptions, vai ter os seguintes dados
+                // TRIBUTOS:
                 // - DefaultRequestCulture,
                 // - SupportedCultures e
-                // - SupportedUICultures_
+                // - SupportedUICultures.
 
                 // 1 -  Qual vaI ser o locale padrão da minha Aplicação. 
-                DefaultRequestCulture = new RequestCulture(enUs),
-                
+                DefaultRequestCulture = new RequestCulture(enUS),
+
                 // 2 - Quais são os locales possíveis da minha Aplicação?
                 //     - Eu vou criar então, um new List<CultureInfo>.
                 //     - Aí, eu vou colocar nesta Lista, somente o meu objeto enUs.
-                SupportedCultures = new List<CultureInfo> { enUs },
+                SupportedCultures = new List<CultureInfo> { enUS },
 
-                // 3 - 
-                SupportedUICultures = new List<CultureInfo> { enUs }
+                // 3 - Este é o último Atributo (da Classe RequestLocalizationOptions) que nós vamos setar.
+                SupportedUICultures = new List<CultureInfo> { enUS }
             };
 
             // Definimos as opções de localização (variáveis enUs e localizationOptions), 
@@ -121,17 +147,24 @@ namespace SalesWebMvc_.Net7
             if (env.IsDevelopment())
             {
                 // O que ambiente de desenvolvimento?
-                // - É a IDE.
-                //     // Assim, POR ENQUANTO, toda vez que nosso programa é RODADO, ele está
-                //     // nesse ambiente (IDE) de desenvolvimento 
+                // - É um dos 2 ambientes que uma aplicação está sendo executada:
+                //     - IDE, como aqui no Visual Studio, ou,
+                //     - já tiver sido publicado. // Para publicar (não executar + pelo VS) a aplicação, digito
+                //                                // - "publicar" na caixinha de Pesquisa no VS.
+                //                                // - Depois clico em "Adicionar um perfil de publicação",
+                //                                //   // Para implantar o aplicativo no Azure, no IIS, em uma pasta,
+                //                                //   // ou em outro host.
+                //                                //   //
+                //                                // - Ou posso clicar em Compilação / Publicar. 
+                //  
                 //
                 // Assim,
-                // - toda vez que rodamos nossa aplicação, como estamos executano pela
+                // - toda vez que rodamos (executamos) nossa aplicação, como estamos executano pela
                 //   IDE, a aplicação (o objeto app) chama o método UseDeveloperExceptionPage(), que captura
                 //   uma Exceção síncrona e assíncrona, de uma pipeline, e gera uma resposta de 
                 //   Erro HTML.
                 // - O método SeedingService.Seed() é executado.                
-                
+
                 app.UseDeveloperExceptionPage();
 
                 // Com esta operação (Seed()) eu vou popular a minha base de dados, caso ela não esteja populada ainda.

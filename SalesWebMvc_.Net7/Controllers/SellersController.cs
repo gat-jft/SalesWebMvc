@@ -188,6 +188,20 @@ namespace SalesWebMvc_.Net7.Controllers
         [ValidateAntiForgeryToken]       // Validar token antifalsificação.     // ANNOTATION [ValidateAntiForgeryToken] é prá prevenir que a minha aplicação sofra ataque CSRF.        // Este tipo de ataque é quando alguém aproveita a minha SESSÃO de autenticação, e envia dados maliciosos aproveitando a minha autenticação.       // Para mais detalhes sobre isso, ver o link do material de apoio.       // Esta ANNOTATION [ValidateAntiForgeryToken], ela especifica que a classe ou método ao qual este atributo é aplicado valida o token anti-falsificação. Se o token antifalsificação não estiver disponível ou se o token for inválido, a validação falhará e o método de ação não será executado.      // Observações:    Este atributo ajuda na defesa contra a falsificação de solicitação entre sites. Isso não impedirá outros ataques de falsificação ou adulteração.           // Token é: Token é um dispositivo eletrônico gerador de senhas, geralmente sem conexão física com o computador, podendo também, em algumas versões, ser conectado a uma porta USB (porta de pendrives). Conectado a uma porta USB, no caso é um pendrive com um programa gerador de senhas eletrônicas (programa token).
         public IActionResult Create(Seller seller)
         {
+            // Este teste serve prá testar se o modelo foi VALIDADO.
+            // Se não (!) for válido, eu vou retornar a minha View (Create), com o objeto (seller).
+            if (!ModelState.IsValid) // Isto testa todas as validações (Annotations) que eu coloquei em cima de cada Atributo da Classe (Entidade ou model, lá na pastinha Models) Seller.
+            {
+                var departments = _departmentService.FindAll(); // Carrego os Departamentos
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments }; // Crio um objeto SellerFormViewModel, aonde o Atributo Seller dele receberá o seller, e o Atributo Departments dele receberá a listinha de departamentos que eu carreguei.
+                return View(viewModel);      // simplesmente vou retornar a minha View (que é o Create), 
+                                             // repassando o meu objeto:  “Volta prá lá e acaba de consertar 
+                                             // (corrigir)”.
+                                             //      Isso vai ficar acontecendo, enquanto o USUÁRIO não 
+                                             //       preencher DIREITINHO o formulário.
+            }
+
+
             // Inseriu + este Vendedor no BD.
             _sellerService.Insert(seller);
 
@@ -431,6 +445,21 @@ namespace SalesWebMvc_.Net7.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Seller seller)
         {
+            // Este teste serve prá testar se o modelo foi VALIDADO.
+            // Se não (!) for válido, eu vou retornar a minha View (Edit), com o objeto.
+            if (!ModelState.IsValid)
+            {
+                var departments = _departmentService.FindAll(); // Carrego os Departamentos
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments }; // Crio um objeto SellerFormViewModel, aonde o Atributo Seller dele receberá o seller, e o Atributo Departments dele receberá a listinha de departamentos que eu carreguei.
+                return View(viewModel);      // simplesmente vou retornar a minha View (que é o Create), 
+                                             // repassando o meu objeto:  “Volta prá lá e acaba de consertar 
+                                             // (corrigir)”.
+                                             //      Isso vai ficar acontecendo, enquanto o USUÁRIO não 
+                                             //       preencher DIREITINHO o formulário.
+            }
+
+
+
             // Como que nós vamos implementar esta Ação?
 
             // 1ª coisa:
