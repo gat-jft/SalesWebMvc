@@ -52,12 +52,14 @@ namespace SalesWebMvc_.Net7.Models
         [DisplayFormat(DataFormatString = "{0:F2}")]  // Para formatar um número com 2 casas decimais. Nas {}, 0 (Zero) indica o valor do Atributo. E este valor vai ter a formatação F2.
         public double BaseSalary { get; set; } // Salário
 
-        
+
         //Não precisa de eu colocar o [Required] aqui no Department, porque como a gente colocou
         // o MACETE do int
         //
         // Associação 1 prá 1: Vendedor "TEM 1" (é composto por 1) Departamento. 
-        public Department Department { get; set; }
+        //
+        // Este atributo estava como obrigatório (sem o ? no final do Tipo). Daí, estava dando erro de Validação na View Create: quando eu clicava no botão pra Criar um Novo Seller (Vendedor), o FRAMEWORK lançava a exceção de que este campo é obrigatório.  // Então, baseado no teste ((if (!ModelState.IsValid) { ... }) de validação do do Model (Entidade), o eu deixo uma Property (campo / atributo) sem o '?', o próprio FRAMEWORK reclama no formulário da View, com a mensagem de erro: "The Field is required". 
+        public Department? Department { get; set; }
 
         // Adicionei este campo, para que não exista no BD, um Vendedor sem um DepartmentId (campo Id do Department).
         // Com esta declaração (colocando o sufixo "Id" depois da Classe (Department) tem tem o relacionamento "PARA 1" com esta Classse Seller)), o framework já sabe que este campo é um INT (correspondente ao Id do Department) e que NÃO pode ser NULO 

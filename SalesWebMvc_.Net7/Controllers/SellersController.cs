@@ -49,11 +49,11 @@ namespace SalesWebMvc_.Net7.Controllers
 
         // Este método Index() vai ter que chamar a operação FindAll(), lá do SellerService.
         // Antes  disso, temos que declarar uma dependência para o SellerService (que é o _sellerService). Depois, devemos fazer o Construtor (public SellerSevice) deste Controller, prá ele INJETAR A DEPENDÊNCIA do serviço (SellerService).
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             // Poderia ser declarado no lugar do Tipo var (genérico), o Tipo List<Seller>.
             // A operação FindAll() do nosso serviço SellerService, vai me retornar uma Lista de Seller.
-            var list = _sellerService.FindAll().ToList();
+            var list = await _sellerService.FindAllAsync();
 
             // Agora, vou passar esta lista, como argumento no meu método View(), prá que ele gerar um IActionResult contendo esta lista (list).
             return View(list);
@@ -69,12 +69,12 @@ namespace SalesWebMvc_.Net7.Controllers
 
 
         //Ação (com o Método GET DO HTTP) para criar um Novo Vendedor.
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             // 1°) Carregar (buscar do BD para cá) os Departamentos:
             //       FindAll() é o método do serviço DepartmentService,
             //       que busca do BD Todos os Departamentos.
-            var departments = _departmentService.FindAll();
+            var departments = await _departmentService.FindAllAsync();
 
             // 2°) Instanciar um OBJETO do nosso ViewModel:
             //     Este ViewModel (SellerFormViewModel) nosso, ele tem 2 dados
@@ -186,13 +186,13 @@ namespace SalesWebMvc_.Net7.Controllers
         // Prá que eu receba este objeto da requisição, e instancie este Vendedor, basta eu colocar ele (este objeto) aqui como parâmetro do Método.
         [HttpPost]                       // Com esta ANNOTATION [HttpPost], eu estou indicando que esta minha Ação (Método                       // ANNOTATION [HttpPost].   ANNOTATION é uma Classe (tipo). Esta ANNOTATION [HttpPost], ele Identifica uma ação (este método Create) é uma Ação de POST e não de GET.         // , que será uma View / Página) que suporta o método HTTP POST.     POST é quando eu tenho uma Operação (Ação) que altera algum dado, como por exemplo, qualquer alteração no BD, seja ela inclusão / deleção etc.      // Então, ela só pode ser usada em Método. NÃO POSSO COLOCAR NUMA class.     // Para uma Ação que usa o método POST.       // Para toda ação POST que eu criar, tenho que ter uma Ação GET, senão não funciona, não renderiza a página.   Por isso que tive que ter o Método anterior, com o mesmo Nome, e SEM o POST, indicando que é GET.    MAS sem parâmetro.     deste Método Então, este  A Ação anterior de mesmo nome é obrigatória, senão não gera a página.
         [ValidateAntiForgeryToken]       // Validar token antifalsificação.     // ANNOTATION [ValidateAntiForgeryToken] é prá prevenir que a minha aplicação sofra ataque CSRF.        // Este tipo de ataque é quando alguém aproveita a minha SESSÃO de autenticação, e envia dados maliciosos aproveitando a minha autenticação.       // Para mais detalhes sobre isso, ver o link do material de apoio.       // Esta ANNOTATION [ValidateAntiForgeryToken], ela especifica que a classe ou método ao qual este atributo é aplicado valida o token anti-falsificação. Se o token antifalsificação não estiver disponível ou se o token for inválido, a validação falhará e o método de ação não será executado.      // Observações:    Este atributo ajuda na defesa contra a falsificação de solicitação entre sites. Isso não impedirá outros ataques de falsificação ou adulteração.           // Token é: Token é um dispositivo eletrônico gerador de senhas, geralmente sem conexão física com o computador, podendo também, em algumas versões, ser conectado a uma porta USB (porta de pendrives). Conectado a uma porta USB, no caso é um pendrive com um programa gerador de senhas eletrônicas (programa token).
-        public IActionResult Create(Seller seller)
+        public async Task<IActionResult> Create(Seller seller)
         {
             // Este teste serve prá testar se o modelo foi VALIDADO.
             // Se não (!) for válido, eu vou retornar a minha View (Create), com o objeto (seller).
             if (!ModelState.IsValid) // Isto testa todas as validações (Annotations) que eu coloquei em cima de cada Atributo da Classe (Entidade ou model, lá na pastinha Models) Seller.
             {
-                var departments = _departmentService.FindAll(); // Carrego os Departamentos
+                var departments = await _departmentService.FindAllAsync(); // Carrego os Departamentos
                 var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments }; // Crio um objeto SellerFormViewModel, aonde o Atributo Seller dele receberá o seller, e o Atributo Departments dele receberá a listinha de departamentos que eu carreguei.
                 return View(viewModel);      // simplesmente vou retornar a minha View (que é o Create), 
                                              // repassando o meu objeto:  “Volta prá lá e acaba de consertar 
@@ -203,7 +203,7 @@ namespace SalesWebMvc_.Net7.Controllers
 
 
             // Inseriu + este Vendedor no BD.
-            _sellerService.Insert(seller);
+            await _sellerService.InsertAsync(seller);
 
             // Redirecionar minha requisição pra a Ação Index(). 
             // Que é a Ação que vai mostrar na Tela Principal (Index), o meu CRUD de Vendedores.
@@ -223,7 +223,7 @@ namespace SalesWebMvc_.Net7.Controllers
         // que aí sim a gente vai DELETAR do BD.
         //
         // Esta Ação vai receber um int que é OPCIONAL (?), que é o id.
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             // Vamos fazer aqui a implementação que também é baseada lá no
             // SCAFFOLDING (geração automática de uma View).
@@ -268,7 +268,7 @@ namespace SalesWebMvc_.Net7.Controllers
             // - Prá eu pegar o VALOR dele caso existe, tem que ser o
             //   "Value".
             // - FindById(int id), retorna o PrimeiroOuDefault Seller (Vendedor).o
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
 
             // Com o comando ACIMA, então, Busquei do Banco de Dados.
             //
@@ -300,9 +300,9 @@ namespace SalesWebMvc_.Net7.Controllers
         // Vamos criar agora uma outra Ação Delete, só que agora vai ser POST.
         [HttpPost]                       // Com esta ANNOTATION [HttpPost], eu estou indicando que esta minha Ação (Método)                       // ANNOTATION [HttpPost].   ANNOTATION é uma Classe (tipo). Esta ANNOTATION [HttpPost], ele Identifica uma ação (este método Delete) é uma Ação de POST e não de GET.         // que será uma View / Página) que suporta o método HTTP POST.     POST é quando eu tenho uma Operação (Ação) que altera algum dado, como por exemplo, qualquer alteração no BD, seja ela inclusão / deleção etc.      // Então, ela só pode ser usada em Método. NÃO POSSO COLOCAR NUMA class.     // Para uma Ação que usa o método POST.       // Para toda ação POST que eu criar, tenho que ter uma Ação GET, senão não funciona, não renderiza a página.   Por isso que tive que ter o Método anterior, com o mesmo Nome, e SEM o POST, indicando que é GET.    MAS sem parâmetro.     deste Método Então, este  A Ação anterior de mesmo nome é obrigatória, senão não gera a página.
         [ValidateAntiForgeryToken]       // Validar token antifalsificação.     // ANNOTATION [ValidateAntiForgeryToken] é prá prevenir que a minha aplicação sofra ataque CSRF.        // Este tipo de ataque é quando alguém aproveita a minha SESSÃO de autenticação, e envia dados maliciosos aproveitando a minha autenticação.       // Para mais detalhes sobre isso, ver o link do material de apoio.       // Esta ANNOTATION [ValidateAntiForgeryToken], ela especifica que a classe ou método ao qual este atributo é aplicado valida o token anti-falsificação. Se o token antifalsificação não estiver disponível ou se o token for inválido, a validação falhará e o método de ação não será executado.      // Observações:    Este atributo ajuda na defesa contra a falsificação de solicitação entre sites. Isso não impedirá outros ataques de falsificação ou adulteração.           // Token é: Token é um dispositivo eletrônico gerador de senhas, geralmente sem conexão física com o computador, podendo também, em algumas versões, ser conectado a uma porta USB (porta de pendrives). Conectado a uma porta USB, no caso é um pendrive com um programa gerador de senhas eletrônicas (programa token).
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _sellerService.Remove(id);
+            await _sellerService.RemoveAsync(id);
 
             // Removi e Vendedor - no comando anterior -, agora eu vou redirecionar prá tela inicial (View Index) de listagem de vendedores do meu CRUD. 
             return RedirectToAction(nameof(Index));
@@ -320,7 +320,7 @@ namespace SalesWebMvc_.Net7.Controllers
         // - Depois, eu vou retornar o objeto.
         // 
         // Então, vamos copiar de lá prá cá.
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -333,7 +333,7 @@ namespace SalesWebMvc_.Net7.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
                 // Substituído pelo RedirectToAction(nameof(Error), new ...) abaixo:
@@ -359,7 +359,7 @@ namespace SalesWebMvc_.Net7.Controllers
         // - Na verdade, ele é OBRIGATÓRIO.
         // - Inclusive, eu já comecei a implementação testando se este Id for igual
         //   a NULO.
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             // Se o id for NULO, retorna só uma mensagem de "Não Encontrado"
             if (id == null)
@@ -400,7 +400,7 @@ namespace SalesWebMvc_.Net7.Controllers
             //   
             // Na variável obj, pode ter um objeto (tipo Seller) ou NULO (quando não há objeto).
             // Se for NULO, retorna o Método NotFound().
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
                 // Este NotFound() é provisório.
@@ -418,7 +418,7 @@ namespace SalesWebMvc_.Net7.Controllers
             // Prá abrir essa Tela de Edição, eu tenho que carregar os Departamentos, prá
             // POVOAR a minha caixinha de Seleção. 
             // Para carregar os Departamentos, eu vou chamar o serviço _departmentService.
-            List<Department> departments = _departmentService.FindAll();
+            List<Department> departments = await _departmentService.FindAllAsync();
 
             // Agora eu vou criar objeto (chamado "viewModel") do tipo SellerFormViewModel.
             //
@@ -432,7 +432,7 @@ namespace SalesWebMvc_.Net7.Controllers
             // Como ele não tem um Construtor para receber os dados nos (), eu vou passar os
             // dados diretamente (já começando a passar os dados { }).
             // Quando eu não tenho () para passar os dados, eu uso as {}.
-            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
+            var viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
 
             // Instanciamos o nosso ViewModel, então agora vou RETORNAR uma View, passando este
             // ViewModel como argumento:
@@ -443,13 +443,13 @@ namespace SalesWebMvc_.Net7.Controllers
         // Neste caso, a Ação vai receber o id, e também o objeto Seller.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Seller seller)
+        public async Task<IActionResult> Edit(int id, Seller seller)
         {
             // Este teste serve prá testar se o modelo foi VALIDADO.
             // Se não (!) for válido, eu vou retornar a minha View (Edit), com o objeto.
             if (!ModelState.IsValid)
             {
-                var departments = _departmentService.FindAll(); // Carrego os Departamentos
+                var departments = await _departmentService.FindAllAsync(); // Carrego os Departamentos
                 var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments }; // Crio um objeto SellerFormViewModel, aonde o Atributo Seller dele receberá o seller, e o Atributo Departments dele receberá a listinha de departamentos que eu carreguei.
                 return View(viewModel);      // simplesmente vou retornar a minha View (que é o Create), 
                                              // repassando o meu objeto:  “Volta prá lá e acaba de consertar 
@@ -509,12 +509,12 @@ namespace SalesWebMvc_.Net7.Controllers
             // Para isso, COMENTEI (//) esses 2 comandos.
             try
             {
-                _sellerService.Update(seller);
+                await _sellerService.UpdateAsync(seller);
                 return RedirectToAction(nameof(Index));
 
             }
             // Em seguida, vou fazer os meu "catch´s"
-            catch (NotFoundException e)
+            catch (ApplicationException e)
             {
                 // Provisóriamente eu vou retornar um NotFound().
                 // Como é provisoriamente, eu uso o return.
@@ -542,24 +542,7 @@ namespace SalesWebMvc_.Net7.Controllers
                 //   que eu vou colocar vai ser a mensagem da Exceção (e.Message).
                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }
-            // E se também acontecer aquela DbConcurrencyException, eu vou dar
-            // provisóriamente um BadRequest();
-            catch (DBConcurrencyException e)
-            {
-                // BadRequest = PedidoRuim();
-                //
-                // Sustituído pelo RedirecionamentoParaAção(Error) abaixo, que é a nossa
-                // Página de Erro.
-                //return BadRequest();
-
-                // E na hora de Redirecitonar prá minha página de Erro, a mensagem
-                // que eu vou colocar vai ser a mensagem da Exceção (e.Message).
-                //
-                // e é o APELIDO que eu dei prá Exceção DbConcurrencyException
-                return RedirectToAction(nameof(Error), new { message = e.Message });
-            }
-
-
+                     
             // Eu posso tirar os 2 "catch" e deixar só 1.
             // Mas para isso, eu tenho que colocar nos () deste "catch" o 
             // ApplicationException.
@@ -579,6 +562,9 @@ namespace SalesWebMvc_.Net7.Controllers
         }
 
         // Ação Error, recebendo um string message como argumento.
+        //
+        // Esta Ação de Error ela não precisa ser ASSÍNCRONA, porque ela não tem NENHUM acesso a dados.
+        //      Ela vai direto retornar a View.
         public IActionResult Error(string message)
         {
             // O que que esta Ação vai fazer?
@@ -600,8 +586,13 @@ namespace SalesWebMvc_.Net7.Controllers
                 //
                 // Aí, eu vou usar um MACETINHO interno do FRAMEWORK, prá eu
                 // pegar (atribuir à uma variável) o Id interno da requisição:
+                // No caso a variável será o Atributo Request Id da Classe ErrorViewModel,
+                // que é o tipo deste objeto "var viewModel".
+                // 
+                // 
                 //
-                // Eu vou pegar (atribuir à uma variável, no caso RequestId) assim: 
+                // Eu vou pegar (atribuir à uma variável, no caso o Atributo RequestId da
+                // Classe ErrorViewModel) assim: 
                 // Activity.Current?.Id ?? HttpContext.TraceIdentifier.
                 //   - Activity: Classe que pertence ao namespace System.Diagnostics;
                 //     Currenty?.Id:
@@ -620,6 +611,7 @@ namespace SalesWebMvc_.Net7.Controllers
             // Agor, eu vou mandar retornar 1 View (a Error, claro!), passando este objeto "viewModel"
             // como argumento. // Que é o arquivo Error.cshtml, na pastinha Views/Shared.
             return View(viewModel);
+
         }
     }
 }

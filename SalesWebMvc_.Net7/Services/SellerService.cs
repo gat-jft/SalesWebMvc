@@ -3,6 +3,9 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore; // Para a operação Include().
 using SalesWebMvc_.Net7.Services.Exceptions; // Para o compilador encontrar a Exceção (classe) NotFoundException e a Exceção DbConcurrencyException. 
 using System.Drawing;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SalesWebMvc_.Net7.Services
 {
@@ -28,18 +31,18 @@ namespace SalesWebMvc_.Net7.Services
         //
         // Este Método (operação) é de um Service. Não de um Controller. 
         // As operações de controlers geralmente são Index(), Contact(), Delete() etc.
-        public List<Seller> FindAll()
+        public async Task<List<Seller>> FindAllAsync()
         {
             //List<Seller> list = new List<Seller>();
             //list.AddRange(_context.Seller.ToList());
             //return list;
 
             // O comando abaixo, substitui tudo acima.  // O comando abaixo, vai acessar minha tabela de dados relacionada à Vendedores (Seller), e converter isto para uma Lista.
-            return _context.Seller.ToList();
+            return await _context.Seller.ToListAsync();
         }
 
         // Método para inserir um NOVO Vendedor (Seller obj) no BD.
-        public void Insert(Seller obj)
+        public async Task InsertAsync(Seller obj)
         {
             // A gente tinha colocado um First().
             // Não vamos mais precisar dele. Porque?
@@ -48,15 +51,21 @@ namespace SalesWebMvc_.Net7.Services
             //obj.Department = _context.Department.First();
 
             // Só adicionar o obj Seller no BD não vai adicionar.
+            //
+            // A operação Add() do Linq, ela é feita somente em MEMÓRIA.
+            //     Então ela NÃO PRECISA ser "Async" (sufixo Async depois de Add).
             _context.Add(obj);
 
             // Eu preciso também confirmar.
-            _context.SaveChanges();
+            //
+            // Esta operação é que realmente vai acessar o Banco de Dados.
+            //    Então nela, é que deve ter a versão "Async" (sufico Async).
+            await _context.SaveChangesAsync();
         }
 
         // Este método vai RETORNAR o Vendedor (Seller).
         // Se o Vendedor não existir, eu vou retornar NULO.
-        public Seller FindById(int id)
+        public async Task<Seller> FindByIdAsync(int id)
         {
             // FirstOrDefault daquele OBJETO obj,
             // cujo (=>) obj.Id seja igual ao id
@@ -94,14 +103,14 @@ namespace SalesWebMvc_.Net7.Services
             //            - da tabela que eu passar no Include() com a Tabela
             //              de um outro Método aplicado depois do Include(), no
             //              Context claro!
-            return _context.Seller.Include(obj => obj.Department).FirstOrDefault(obj => obj.Id == id);
+            return await _context.Seller.Include(obj => obj.Department).FirstOrDefaultAsync(obj => obj.Id == id);
         }
 
         // Agora vamos implementar o Método Remove.
         // Remover é uma Operação que não precisa retorna NADA.
         // - É só ir la no BD, e remover o elemento.
         // - Por isso é "void".
-        public void Remove(int id)
+        public async Task RemoveAsync(int id)
         {
             // Esta implementação é baseada naquele SCAFFOLDING (ferramenta
             // de geração automática da View), que a gente fez lá do
@@ -111,7 +120,7 @@ namespace SalesWebMvc_.Net7.Services
 
             // 1° eu vou pegar o OBJETO chamando o
             // "_context.Find passando o id.
-            var obj = _context.Seller.Find(id);
+            var obj = await _context.Seller.FindAsync(id);
 
             // Com o OBJETO nas mãos, aí eu chamar o
             // "_context.Seller.Remove(obj);
@@ -125,7 +134,7 @@ namespace SalesWebMvc_.Net7.Services
             // Agora, eu preciso CONFIRMAR (SaveChanges) esta alteração,
             // para o ENTITY FRAMEWORK efetivá-la, lá no Banco de Dados.
             // Prá fazer isso, eu ou ter que chamar o "_context.SaveChanges()".
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         // O que que vai ser atualizar um OBJETO O TIPO Seller?
@@ -133,7 +142,7 @@ namespace SalesWebMvc_.Net7.Services
         // Update() corresponte a Ação de Edit (página) num CRUD.
         // Tanto que, depois de implementar este Método, eu tenho que verificar SE O LINK PRA 
         // AÇÃO DE Index (de Sellers) ESTÁ CORRETO.
-        public void Update(Seller obj)
+        public async Task UpdateAsync(Seller obj)
         {
             // O que que vai ser atualizar um objeto do Tipo Seller?   
 
@@ -151,14 +160,18 @@ namespace SalesWebMvc_.Net7.Services
             // - No caso, "x => x.Id == obj.Id" é o PREDICATE.
             // - Então, com o "if", eu estou testando:
             //          SE EXISTE NO BANCO DE DADOS, ALGUM VENDEDOR (Seller) x, CUJO Id SEJA IGUAL AO 
-            //          Id DO MEU OBJETO (obj). 
+            //          Id DO MEU OBJETO (obj).
+                   
+
+            // hasAny = temAlgum
+            bool hasAny = await _context.Seller.AnyAsync(x => x.Id == obj.Id);
             //
             //if (_context.Seller.Any(x => x.Id == obj.Id) == false), foi substituído pelo abaixo, com 
             // "!" ANTES. Prá dizer que se NÃO (!) EXISTIR O ELEMENTO NO BD, COM O Id == AO Id DO obj.
             // 
             // Este "if" quer dizer:
             // Se NÃO (!) EXISTIR Qualquer (Any) Vendedor. Vendedor x cujo x.Id seja igual ao obj.Id.
-            if (!_context.Seller.Any(x => x.Id == obj.Id))
+            if (!hasAny)
             {
                 // Vou lançar a Exceção NotFoundException, com a MENSAGEM "id not found".
                 throw new NotFoundException("id not found");
@@ -194,7 +207,7 @@ namespace SalesWebMvc_.Net7.Services
             try
             {
                 _context.Update(obj);
-                _context.SaveChanges(); // Para confirmar a Atualização (Update()).
+                await _context.SaveChangesAsync(); // Para confirmar a Atualização (Update()).
             }
             catch (DbUpdateConcurrencyException e)
             {                // Então, se acontecer essa Exceção DbUpdateConcurrencyExceptiondo do
