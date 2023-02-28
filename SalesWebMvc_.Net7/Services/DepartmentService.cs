@@ -1,5 +1,5 @@
 ﻿using SalesWebMvc_.Net7.Models; // É onode está a nossa Classe"SalesWebMvc_Net7Context".    // Context é o nosso contexto de BD, no C#.
-using System.Linq; // Porque vamos precisar do Linq: vamos usar o Função (Método) OrderBy do Linq. 
+using System.Linq; // Link não executa a expressão, ele só prepara a Consulta ao BD. A expressão Linq (expressão lambda de BD) só é executada quando algo depois dele provoque a Consulta. O método que vem depois de uma expressão Linq, como a ".ToList()" é que provocará a execução da consulta (Linq) do BD.      // Porque vamos precisar do Linq: vamos usar o Função (Método) OrderBy do Linq. 
 using System.Collections.Generic; // Para importar a Lista (Classe List).
 using System.Threading.Tasks; // Para eu poder criar as minhas operações (Métodos) assíncronas. Ou seja, funções que retornam o Tipo Task (Task<tipo retornado>), decoradas com a palavrinha "async", com o SUFIXO "Async" no Nome (nos nomes das Ações eu não coloco este SUFIXO), e com a "await" (aguardando pela resposta do chamada assíncrona). 
 using System.Runtime.CompilerServices;
@@ -47,6 +47,8 @@ namespace SalesWebMvc_.Net7.Services
         // - palavrinha "await" antes do que vai ser retornado da função;
         //    no caso o retorno é uma "expressão lambda, que retorna um Lista ordenada por Nome", e depois o 
         //
+        // Agora, a nossa função (FindAllAsync) ela está assíncrona (async), retornando um Task<List<Department>> (Task de List de Department), e dentro dela nós fazemos uma OUTRA CHAMADA ASSÍNCRONA (_context.Department.OrderBy(x => x.Name).ToListAsync()), COLOCANDO A PALAVRINHA "await" (prá avisar o compilador que essa CHAMADA via ser assíncrona).
+        //        Dessa forma, essa execução (_context.Department.OrderBy(x => x.Name).ToListAsync()), não vai bloquear a minha aplicação.
         public async Task<List<Department>> FindAllAsync()
         {
 

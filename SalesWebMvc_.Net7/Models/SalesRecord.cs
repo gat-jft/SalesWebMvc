@@ -1,4 +1,5 @@
 ﻿using System; // Import necessário para o Tipo DateTime, cw etc.
+using System.ComponentModel.DataAnnotations;
 using SalesWebMvc_.Net7.Models.Enums; // para ele reconhecer o tipo enumerado SaleStatus.
 
 namespace SalesWebMvc_.Net7.Models
@@ -6,12 +7,25 @@ namespace SalesWebMvc_.Net7.Models
     public class SalesRecord
     {
         public int Id { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime Date { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:F2}")]
         public double Amount { get; set; } // Quantia
+        
         public SaleStatus Status { get; set; }
 
         // Associação "1 pra 1": Cada SalesRecord (Venda) possui 1 Vendedor.
+        // 
+        // Esta Classe Venda (SalesRecord) aqui "tem um" Vendedor.
+        // Não é um objeto Vendedor na Classe. Mas sim 1 referência (1 ponteiro, ie endereço
+        // de memória), ou seja, uma variável que guarda o endereço para um objeto do
+        // Tipo Seller (Vendedor).
         public Seller Seller { get; set; }
+        
+        // ADICIONEI, DEPOIS REMOVI ESTA PROPRIEDADE PQ NA AULA 274 ESTAVA DANDO ERRO DE INTEGRIDADE REFERENCIAL COM O VENDEDOR.
+        //public int SellerId { get; set; }
 
         // Construtor Default é OBRIGATÓRIO, se eu colocar o Construtor com argumentos.
         // O Framework precisa dele assim.

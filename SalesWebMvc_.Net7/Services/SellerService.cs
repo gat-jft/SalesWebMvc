@@ -6,6 +6,9 @@ using System.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Runtime.Intrinsics.X86;
+using NuGet.Protocol.Plugins;
+using System.Security.Policy;
 
 namespace SalesWebMvc_.Net7.Services
 {
@@ -31,6 +34,11 @@ namespace SalesWebMvc_.Net7.Services
         //
         // Este Método (operação) é de um Service. Não de um Controller. 
         // As operações de controlers geralmente são Index(), Contact(), Delete() etc.
+        //
+        // No início do projeto, o retorno era só uma List<Seller> (Lista de Vendedores). Então,se tratava de um processamento síncrono.
+        // Agora, o retorno é um Task<List<Seller>>. Assim, este método tornou-se um processamnto ASSINCRONO.
+        //        Agora, ele funciona como THREAD? Ie, terá um processamento paralelo?
+        //        Creio que sim, ele terá um processamento paralelo?? Usamos as Task´s para tAgora, vamos melhor a perestávamos 
         public async Task<List<Seller>> FindAllAsync()
         {
             //List<Seller> list = new List<Seller>();
@@ -42,6 +50,7 @@ namespace SalesWebMvc_.Net7.Services
         }
 
         // Método para inserir um NOVO Vendedor (Seller obj) no BD.
+        // Convertendo uma função para assíncrona (função que não bloqueia a minha aplicação), se o retorno for "void" tenho que substituir "void" por "Task".
         public async Task InsertAsync(Seller obj)
         {
             // A gente tinha colocado um First().
@@ -53,7 +62,7 @@ namespace SalesWebMvc_.Net7.Services
             // Só adicionar o obj Seller no BD não vai adicionar.
             //
             // A operação Add() do Linq, ela é feita somente em MEMÓRIA.
-            //     Então ela NÃO PRECISA ser "Async" (sufixo Async depois de Add).
+            //     Então ela NÃO PRECISA ter a versão "Async" (sufixo Async depois de Add, que ficaria AddAsync).
             _context.Add(obj);
 
             // Eu preciso também confirmar.
@@ -65,6 +74,7 @@ namespace SalesWebMvc_.Net7.Services
 
         // Este método vai RETORNAR o Vendedor (Seller).
         // Se o Vendedor não existir, eu vou retornar NULO.
+        // 
         public async Task<Seller> FindByIdAsync(int id)
         {
             // FirstOrDefault daquele OBJETO obj,
@@ -116,25 +126,43 @@ namespace SalesWebMvc_.Net7.Services
             // de geração automática da View), que a gente fez lá do
             // Departament.
 
-
-
-            // 1° eu vou pegar o OBJETO chamando o
-            // "_context.Find passando o id.
-            var obj = await _context.Seller.FindAsync(id);
-
-            // Com o OBJETO nas mãos, aí eu chamar o
-            // "_context.Seller.Remove(obj);
+            // Este try ... catch é para:
+            // Caso ocorra uma violação de Integridade Referencial (quando deletamos um Seller, teremos uma
+            // Venda (SalesRecord) sem Vendedor), o ENTTITY FRAMEWORK lança uma Exceção, a DbUpdateException.
             //
-            // Não tem o comando "return obj;" para retornar 1 Vendedor
-            // Remove é uma Ação que eu não preciso RETORNAR NADA.
-            _context.Seller.Remove(obj);
-
-            // Removi o objeto do DbSet, ou seja, fiz uma alteração no BD.
+            // Daí, nós vamos interceptar (catch) essa Exceção do ENTITY FRAMEWORK, e vamos RElançar ela na
+            // nossa Exceção Personalizada chamada IntegrityException, do nível(camada) de Serviço.
             //
-            // Agora, eu preciso CONFIRMAR (SaveChanges) esta alteração,
-            // para o ENTITY FRAMEWORK efetivá-la, lá no Banco de Dados.
-            // Prá fazer isso, eu ou ter que chamar o "_context.SaveChanges()".
-            await _context.SaveChangesAsync();
+            // Assim, nós respeitamos a Arquitetura Geral do MVC.
+            try
+            {
+                // 1° eu vou pegar o OBJETO chamando o
+                // "_context.Find passando o id.
+                var obj = await _context.Seller.FindAsync(id);
+
+                // Com o OBJETO nas mãos, aí eu chamar o
+                // "_context.Seller.Remove(obj);
+                //
+                // Não tem o comando "return obj;" para retornar 1 Vendedor
+                // Remove é uma Ação que eu não preciso RETORNAR NADA.
+                _context.Seller.Remove(obj);
+
+                // Removi o objeto do DbSet, ou seja, fiz uma alteração no BD.
+                //
+                // Agora, eu preciso CONFIRMAR (SaveChanges) esta alteração,
+                // para o ENTITY FRAMEWORK efetivá-la, lá no Banco de Dados.
+                // Prá fazer isso, eu ou ter que chamar o "_context.SaveChanges()".
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                // Esta mensagem é do FRAMEWORK.
+                //throw new IntegrityException(e.Message);
+
+                // Foi substituída a mensagem do FRAMEWORK pela minha (Personalizada).
+                // "Não posso deletar o vendedor porque ele/ela tem vendas".
+                throw new IntegrityException("Can´t delete seller because he/she has sales");
+            }
         }
 
         // O que que vai ser atualizar um OBJETO O TIPO Seller?
@@ -161,7 +189,7 @@ namespace SalesWebMvc_.Net7.Services
             // - Então, com o "if", eu estou testando:
             //          SE EXISTE NO BANCO DE DADOS, ALGUM VENDEDOR (Seller) x, CUJO Id SEJA IGUAL AO 
             //          Id DO MEU OBJETO (obj).
-                   
+
 
             // hasAny = temAlgum
             bool hasAny = await _context.Seller.AnyAsync(x => x.Id == obj.Id);

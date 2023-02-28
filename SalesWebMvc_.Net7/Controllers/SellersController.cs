@@ -53,6 +53,8 @@ namespace SalesWebMvc_.Net7.Controllers
         {
             // Poderia ser declarado no lugar do Tipo var (genérico), o Tipo List<Seller>.
             // A operação FindAll() do nosso serviço SellerService, vai me retornar uma Lista de Seller.
+            //
+            // A indicação "await" é prá ele (compilador) ESPERAR A RESPOSTA dessa chamada (_sellerService.FindAllAsync();) que é ASSÍNCRONA.  
             var list = await _sellerService.FindAllAsync();
 
             // Agora, vou passar esta lista, como argumento no meu método View(), prá que ele gerar um IActionResult contendo esta lista (list).
@@ -302,10 +304,17 @@ namespace SalesWebMvc_.Net7.Controllers
         [ValidateAntiForgeryToken]       // Validar token antifalsificação.     // ANNOTATION [ValidateAntiForgeryToken] é prá prevenir que a minha aplicação sofra ataque CSRF.        // Este tipo de ataque é quando alguém aproveita a minha SESSÃO de autenticação, e envia dados maliciosos aproveitando a minha autenticação.       // Para mais detalhes sobre isso, ver o link do material de apoio.       // Esta ANNOTATION [ValidateAntiForgeryToken], ela especifica que a classe ou método ao qual este atributo é aplicado valida o token anti-falsificação. Se o token antifalsificação não estiver disponível ou se o token for inválido, a validação falhará e o método de ação não será executado.      // Observações:    Este atributo ajuda na defesa contra a falsificação de solicitação entre sites. Isso não impedirá outros ataques de falsificação ou adulteração.           // Token é: Token é um dispositivo eletrônico gerador de senhas, geralmente sem conexão física com o computador, podendo também, em algumas versões, ser conectado a uma porta USB (porta de pendrives). Conectado a uma porta USB, no caso é um pendrive com um programa gerador de senhas eletrônicas (programa token).
         public async Task<IActionResult> Delete(int id)
         {
-            await _sellerService.RemoveAsync(id);
+            try
+            {
+                await _sellerService.RemoveAsync(id);
 
-            // Removi e Vendedor - no comando anterior -, agora eu vou redirecionar prá tela inicial (View Index) de listagem de vendedores do meu CRUD. 
-            return RedirectToAction(nameof(Index));
+                // Removi e Vendedor - no comando anterior -, agora eu vou redirecionar prá tela inicial (View Index) de listagem de vendedores do meu CRUD. 
+                return RedirectToAction(nameof(Index));
+            }
+            catch (IntegrityException e)
+            {
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
         }
 
 
@@ -542,7 +551,7 @@ namespace SalesWebMvc_.Net7.Controllers
                 //   que eu vou colocar vai ser a mensagem da Exceção (e.Message).
                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }
-                     
+
             // Eu posso tirar os 2 "catch" e deixar só 1.
             // Mas para isso, eu tenho que colocar nos () deste "catch" o 
             // ApplicationException.

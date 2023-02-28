@@ -23,13 +23,13 @@ namespace SalesWebMvc_.Net7.Models
         [Required(ErrorMessage = "{0} required")] // Substituindo os 2 acima, na {0} é prá string colocar o Nome do Atributo.
         //[StringLength(60, MinimumLength = 3, ErrorMessage = "Name size between 3 and 60")] // [StringLength(60, ...), é pra eu estabelecer limites de Mínimo e Máximo pro tamanho deste Nome.     // 60 é o Máximo (de caracteres claro!), 3 é o Mínimo)   // E eu posso colocar uma mensagem de erro personalizada, no 3° argumento da ANNOTATION (Classe). Se eu não colocar uma mensagem de erro personalizada (como esta aqui: "o tamanho do Nome deve ser entre 3 e 60), o FRAMEWORK ele tem uma mensagem padrão. 
         [StringLength(60, MinimumLength = 3, ErrorMessage = "{0} size between {2} and {1}")] // Eu posso PARAMETRIZAR a string (" ") mensagem de erro personalizada "o tamanho do Nome deve ser entre 3 e 60".    // Isto é, eu posso pegar os valores aqui, que eu defini antes (Name, 60, 3).    // Para que a string mostre, eu vou colocar {0}, {1} e {2} na string " eu colocar na string "Name size between 3 and 60".    // Assim: "{0} size between {2} and {1]".     // O FRAMEWORK já sabe que {0} é o Nome do Atributo, {2} é o 2° parâmetro que eu coloquei no parâmetro () do Construtor deste [StringLength()] aqui. {1} é o 1° parâmetro que eu coloquei no Construtor deste [StringLength()].
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
 
         [EmailAddress(ErrorMessage = "Enter a valid email")] // Quando o usuário colocar um Email, cujo formato não seja de email, como sem o @.
         [Required(ErrorMessage = "{0} required")] // Substituindo os 2 acima, na {0} é prá string colocar o Nome do Atributo.
         [DataType(DataType.EmailAddress)]  // Transforma o email de um texto plano para um LinkDeEmail (com o sublinhado em baixo do texto).
-        public string? Email { get; set; }
+        public string Email { get; set; }
                
         
         // ANNOTATION [Display] serve para o que que eu quero que aparece de rótulo lá nas minhas telas.
