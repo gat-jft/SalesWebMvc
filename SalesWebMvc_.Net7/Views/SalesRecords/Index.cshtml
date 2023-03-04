@@ -1,0 +1,73 @@
+﻿<!-- Esta View (pagina) Index, tem os formulários de Busca: 
+    BuscaSimples, e BuscaAgrupada.
+
+    O professor já fez: basta copiar do GitHub (https://github.com/acenelio/workshop-asp-net-core-mvc/blob/master/SalesWebMvc/Views/SalesRecords/Index.cshtml) 
+    prá cá.
+ -->
+@{
+    ViewData["Title"] = "Sales Records"; <!-- O título da Pagina é "Sales Records" -->
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Na página tem 2 formulários -->
+<div class="row">
+    <div class="col-md-6">
+        <!-- O 1° formulário, vai chamar a Ação SimpleSearch. Que é a Ação que nós criamos no Controlador (SalesRecordsController). -->
+        <form class="form-horizontal" asp-action="SimpleSearch">
+            <fieldset>
+                <legend>Simple search</legend>
+                <div class="form-group">
+                    <!-- O que que este formulário vai ter: Ele vai ter uma caxinha, pra eu escolher a DataMínima (minDate).  ...  -->
+                    <label for="minDate" class="col-lg-2 control-label">Min Date</label>
+                    <div class="col-lg-10">
+                        <!-- ... Que vai ser o <input>, do Tipo Date. ... -->
+                        <input type="date" name="minDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <!-- E uma outra caixinha, prá eu escolhar a DataMáxima (maxDate). ... -->
+                    <label for="maxDate" class="col-lg-2 control-label">Max Date</label>
+                    <!-- Também, vai ser um <input> do Tipo Date. Esse <input> é o Calendário do FRAMEWORK. -->
+                    <div class="col-lg-10">
+                        <input type="date" name="maxDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-10 col-lg-offset-2">
+                        <!-- No final, ele vai ter um BOTÃO de "enviar" ("submit").   Que aí ele vai enviar o formulário, e chamar esta Ação SimpleSearch, do meu Controlador. -->
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<!-- Na página vai ter um outro formulário, que vai ser a mesma coisa do 1° formulário, só que ele vai enviar para a Ação GroupingSearch.-->
+<div class="row">
+    <div class="col-md-6">
+        <form class="form-horizontal" asp-action="GroupingSearch">
+            <fieldset>
+                <legend>Grouping search</legend>
+                <div class="form-group">
+                    <label for="minDate" class="col-lg-2 control-label">Min Date</label>
+                    <div class="col-lg-10">
+                        <input type="date" name="minDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maxDate" class="col-lg-2 control-label">Max Date</label>
+                    <div class="col-lg-10">
+                        <input type="date" name="maxDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-10 col-lg-offset-2">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
