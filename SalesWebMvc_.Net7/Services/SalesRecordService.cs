@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore; // Para a função Include
 using SalesWebMvc_.Net7.Models;
+using System.Data.Common;
 using System.Drawing;
 using System.Text;
 
@@ -84,6 +85,8 @@ namespace SalesWebMvc_.Net7.Services
             //     result.Include(x => x.Seller) //Faz a JOIN da Tabela 'SalesRecord' (variável result), com tabela (Seller).
             //           .Include(x => x.Seller.Department) // Depois, faz a JOIN com os Departamentos do Vendedor.
             //
+            // Mais em: 
+            //
             // result = consulta. // result RECEBE a tabela SalesRecord.
             var result = from obj in _context.SalesRecord select obj;
            
@@ -120,5 +123,50 @@ namespace SalesWebMvc_.Net7.Services
                    .ToListAsync();
         }
 
-    }
+        // O Tipo de retorno, vai ser uma Task de List de Igrouping de <Department, SalesRecodr>. 
+        public async Task<List<IGrouping<Department, SalesRecord>>> FindByDateGroupingsync(DateTime? minDate, DateTime? maxDate)
+        {
+            
+   
+
+
+            // Estamos preparando o objeo do Tipo IQueryable.  // result = consulta. 
+            var result = from obj in _context.SalesRecord select obj;
+
+            // Agora vamos colocar as restrições de data.
+            //
+            // Se eu informei a DataMínima (minDate.HasValue)
+            if (minDate.HasValue)
+            {
+                // result é o objeto (do Tipo IQueryable), que vai avaliar a consulta
+                result = result.Where(x => x.Date >= minDate.Value);
+            }
+
+            // Da mesma forma, eu vou fazer a DataMáxima:
+            // Se foi informado uma DataMáxima (maxDate.HasValue)?
+            if (maxDate.HasValue)
+            {
+                result = result.Where(x => x.Date <= maxDate.Value);
+            }
+
+            // Prá executar minha consulta, uso o ToList().
+            // Porque?
+            // - Porque as operações do Linq não executam a consulta. Elas
+            //   só preparam a consulta. :
+            //return result.ToList();
+            //
+            // Só que eu vou acrescentar mais coisas aqui no Método:
+            // - Eu vou fazer um JOIN com a tabela de Vendedor, e com a
+            //   tabela de Departamento.
+            // - E depois, eu ainda vou ORDENAR DECRESCENTEMENTE por Data.
+            //
+            // TUDO ISSO EU VOU FAZER COM O Linq E COM AQUELA FUNÇÃO Include() DO ENTITY FRAMEWORK.
+            return await result
+                   .Include(x => x.Seller) // Isso aqui faz o JOIN das Tabelas prá mim.    // Include é do Linq (namespace Linq).
+                   .Include(x => x.Seller.Department) // Assim também eu faço o JOIN com a Tabela de Departamentos.
+                   .OrderByDescending(x => x.Date)
+                   .GroupBy(x => x.Seller.Department)  // Agora prá terminar, eu vou fazer o OrdeByDescending(), do Linq.   // Nos "()" eu vou informar que eu vou ORDENAR por Data (x => x.Date).
+                   .ToListAsync();
+        }
+    }   
 }

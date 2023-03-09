@@ -1,5 +1,5 @@
 ﻿using System; // Import necessário para o Tipo DateTime, cw etc.
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations; // Para as ANNOTATIONS (para formatar Data, números, campo requerido, email etc), como a [DisplayFormat].
 using SalesWebMvc_.Net7.Models.Enums; // para ele reconhecer o tipo enumerado SaleStatus.
 
 namespace SalesWebMvc_.Net7.Models
@@ -8,10 +8,10 @@ namespace SalesWebMvc_.Net7.Models
     {
         public int Id { get; set; }
 
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")] // "{0:dd/MM/yyyy}" é a nossa Máscara de Formatação.
         public DateTime Date { get; set; }
 
-        [DisplayFormat(DataFormatString = "{0:F2}")]
+        [DisplayFormat(DataFormatString = "{0:F2}")] // 0 na Máscara de Formatação: é o valor do Atributo.   // Quer dizer que o valor vai receber a fomatação F2 (Flutuante 2, ou seja 2 casas decimais).
         public double Amount { get; set; } // Quantia
         
         public SaleStatus Status { get; set; }

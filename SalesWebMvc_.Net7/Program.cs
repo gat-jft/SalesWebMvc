@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 
 namespace SalesWebMvc_.Net7
 {
@@ -22,7 +21,7 @@ namespace SalesWebMvc_.Net7
             // Porque, na Program, ele não consegui manipular o Método
             // Configure, no objeto builder.
 
-            CreateWebHostBuilder(args).Build().Run(); 
+            CreateWebHostBuilder(args).Build().Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

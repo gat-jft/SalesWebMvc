@@ -15,14 +15,27 @@
                     <label for="minDate">Min Date</label>
                     <!-- Quando eu registrava uma Data na caixinha, ela não ficava registrada.
                          Aí, coloquei este este atributo ABAIXO "value" recebendo um código C#.
-                         - Porque eu posso colocar qualquer código C# numa View (página .cshtml),
-                           porque é uma página que recebe tanto código HTML quanto C#.
-                         - O código C# começa com o ARROBA.      
-                         - Então, o "value" (valor exibido), sempre terá o código C#, que é
-                           no caso um Dicionário (do C#) [chave] = Valor.
-                         - E um ViewData eu posso colocar tanto aqui na View quanto no Controlador
-                           referente a esta View, e capturá-lo lá do Controlador, usando o ARROBA
-                           seguido do Código / elemento do C#.
+                           - Porque eu posso colocar qualquer código C# numa View (página .cshtml),
+                             porque é uma página que recebe tanto código HTML quanto C#.
+                           - O código C# começa com o ARROBA.      
+                           - Então, o "value" (valor exibido), sempre terá o código C#, que é
+                             no caso um Dicionário (do C#) [chave] = Valor.
+                           - E um ViewData eu posso colocar tanto aqui na View quanto no Controlador
+                             referente a esta View, e capturá-lo lá do Controlador, usando o ARROBA
+                             seguido do Código / elemento do C#.
+                          Então, existem 2 formas de eu enviar / capturar algo de um Controlador para 
+                          uma View:
+                          - Crio uma Dado no Controlador, o melhor forma é ViewData, que é um Dicionário
+                            Chave=Valor.
+                          - Na View eu capturo este ViewData ou qq outro Tipo, na View, chamando este
+                            Tipo ou o que for começando com o ARROBA.
+                          - OU, passando do Controlador para a View, no return View(Dado, como uma Lista etc).
+                              - Quando o dado é passado no return do Controlador, na View eu recebo ele na 
+                                1ª linha da View, como exemplo esta aqui:
+                                "ARROBAmodel IEnumerable<SalesWebMvc_.Net7.Models.SalesRecord>"
+                              - Quando não é passado no return, eu crio o dado no Controlador, como exemplo
+                                um Dicionário ViewData[], (mas acho que pode ser até List!!!), eu buco ele
+                                lá do Controlador com o ARROBA seguido do Dado. 
                     -->
                     <input type="date" class="form-control" name="minDate" value=@ViewData["minDate"] />
                 </div>
